@@ -57,9 +57,11 @@ export function ThemeToggle() {
       onClick={flip}
       // Hidden without JavaScript, where it couldn't do anything (CSS still follows the system theme).
       className="label link-draw hidden hover:text-foreground js:inline"
-      aria-label="Toggle colour theme"
     >
+      {/* The accessible name ("Switch to dark theme") contains the visible word, as WCAG 2.5.3 asks. */}
+      <span className="sr-only">Switch to </span>
       {theme === null ? "Theme" : theme === "dark" ? "Light" : "Dark"}
+      <span className="sr-only"> theme</span>
     </button>
   );
 }

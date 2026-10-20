@@ -23,14 +23,14 @@
 }
 
 /* Light (default). --accent-text is the accent darkened just enough to pass
-   AA (4.9:1) for small text; the brand vermilion stays for large type and rules. */
+   AA for small text (5.4:1 on paper, 4.9:1 on paper-2); the brand vermilion stays for large type and rules. */
 :root {
   --background: #f4f1ea;
   --foreground: #1a1a17;
   --muted-foreground: #5e5a52;
   --border: #dedad0;
   --accent: #e4572e;
-  --accent-text: #b8401c;
+  --accent-text: #b03a17;
   --paper-2: #ebe7dd;
   --phone: #1a1a17;
   color-scheme: light;
@@ -216,10 +216,13 @@
 
 /* Hide split targets until GSAP takes over (only when JS + motion are on).
    Without JS the `js` class is never added, so headings are always visible. */
-html.js .split-pending {
-  visibility: hidden;
-  /* Fail-safe: if GSAP never runs (script error, very slow network), show the text after 2.5s anyway. */
-  animation: split-failsafe 0s 2.5s forwards;
+/* Tablet/desktop only: on phones the name shows at once (better LCP on slow networks). */
+@media (min-width: 768px) {
+  html.js .split-pending {
+    visibility: hidden;
+    /* Fail-safe: if GSAP never runs (script error, very slow network), show the text after 2.5s anyway. */
+    animation: split-failsafe 0s 2.5s forwards;
+  }
 }
 @keyframes split-failsafe {
   to {

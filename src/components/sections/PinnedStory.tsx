@@ -75,19 +75,15 @@ export function PinnedStory({ n }: { n: string }) {
             scrollTrigger: { trigger: ".pin-steps", start: "top center", end: "bottom center", scrub: true },
           },
         );
+        // Whichever step crosses 60% of the viewport swaps the phone's screen. (Lovable also faded the
+        // other steps to 25% opacity; that failed AA contrast, so the active step's label turns vermilion instead.)
         gsap.utils.toArray<HTMLElement>(".pin-step").forEach((el, i) => {
-          // Whichever step crosses 60% of the viewport swaps the phone's screen.
           ScrollTrigger.create({
             trigger: el,
             start: "top 60%",
             end: "bottom 60%",
             onToggle: (self) => self.isActive && setActive(i),
           });
-          gsap.fromTo(
-            el,
-            { opacity: 0.25 },
-            { opacity: 1, scrollTrigger: { trigger: el, start: "top 75%", end: "top 50%", scrub: true } },
-          );
         });
       });
       return () => mm.revert();
@@ -111,9 +107,9 @@ export function PinnedStory({ n }: { n: string }) {
         <div className="relative col-span-5 col-start-8">
           <span className="pin-progress absolute top-0 left-0 h-full w-px origin-top bg-accent" aria-hidden />
           <ol className="pin-steps border-l">
-            {fosSteps.map((s) => (
+            {fosSteps.map((s, i) => (
               <li key={s.n} className="pin-step flex min-h-[70vh] flex-col justify-center pl-10">
-                <p className="label">Step {s.n}</p>
+                <p className={`label transition-colors ${active === i ? "text-accent-text" : ""}`}>Step {s.n}</p>
                 <h3 className="mt-3 text-3xl font-medium tracking-tight">{s.title}</h3>
                 <p className="mt-4 max-w-sm leading-relaxed text-muted-foreground">{s.body}</p>
               </li>

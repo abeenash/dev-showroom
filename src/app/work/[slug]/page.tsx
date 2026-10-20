@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, ResolvingMetadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { caseStudies, getCaseStudy } from "@/content/case-studies";
@@ -14,10 +14,21 @@ export function generateStaticParams() {
 export const dynamicParams = false;
 
 // 3. Per-page <title> and description. `params` is a Promise in Next 16.
-export async function generateMetadata({ params }: PageProps<"/work/[slug]">): Promise<Metadata> {
+export async function generateMetadata(
+  { params }: PageProps<"/work/[slug]">,
+  parent: ResolvingMetadata,
+): Promise<Metadata> {
   const study = getCaseStudy((await params).slug);
   if (!study) return {};
-  return { title: `${study.title} case study`, description: study.description };
+  const title = `${study.title} case study`;
+  // A page's `openGraph` replaces the parent's whole object (it isn't merged field by field),
+  // so carry the inherited social image forward from the resolved parent metadata.
+  const images = (await parent).openGraph?.images;
+  return {
+    title,
+    description: study.description,
+    openGraph: { type: "article", title, description: study.description, images },
+  };
 }
 
 export default async function CaseStudyPage({ params }: PageProps<"/work/[slug]">) {

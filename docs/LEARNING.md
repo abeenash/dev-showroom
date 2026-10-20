@@ -84,3 +84,12 @@ Entry format:
 - **Your task (TODO(human)):** skipped in ship mode. Rotate your OpenWeather key (the old one is public in the 2025 repo), add the new one to `.env.local` and Vercel, and check `/playground/weather-checker`.
 
 ---
+
+### Phase 8 — Metadata files: OG images, icons, sitemap, robots
+- **What it is:** Special filenames in `app/` become real URLs: `opengraph-image.tsx` → the social preview image (JSX drawn to PNG by `next/og` at build time), `icon.tsx` → favicon, `sitemap.ts` → `/sitemap.xml`, `robots.ts` → `/robots.txt`. Next.js also adds the matching `<meta>`/`<link>` tags for you. `metadataBase` turns relative image URLs into absolute ones, which social sites require.
+- **Where it lives:** `src/app/opengraph-image.tsx:18`, `src/app/icon.tsx`, `src/app/sitemap.ts:7`, `src/app/robots.ts`, `src/app/layout.tsx:12` (`metadataBase`), `src/app/work/[slug]/page.tsx:20` (`ResolvingMetadata` keeps the parent's OG image)
+- **Common mistake:** setting `openGraph` on a page and losing the inherited `og:image`. A page's `openGraph` replaces the parent's whole object; it isn't merged. Also: `NEXT_PUBLIC_*` values are baked in at **build** time, so set `NEXT_PUBLIC_SITE_URL` in Vercel before deploying, not after.
+- **AMS bridge:** AMS web is mostly behind login, so its `robots.ts` should disallow everything except the landing page, and it needs no sitemap for private routes.
+- **Your task (TODO(human)):** skipped in ship mode. Paste your live URL into the opengraph.xyz preview tool after deploying and check the card.
+
+---

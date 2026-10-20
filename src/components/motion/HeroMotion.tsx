@@ -13,10 +13,14 @@ export function HeroMotion({ children }: { children: ReactNode }) {
       const targets = gsap.utils.toArray<HTMLElement>(".split-pending");
       const mm = gsap.matchMedia();
 
-      mm.add(MQ.motion, (context) => {
+      mm.add(MQ.motion, () => {
+        gsap.from(".hero-fade", { opacity: 0, y: 12, duration: 0.8, delay: 0.45, stagger: 0.06, ease: "expo.out" });
+      });
+
+      // The masked line reveal runs from tablet up; phones show the name immediately (matches globals.css).
+      mm.add(`${MQ.motion} and (min-width: 768px)`, (context) => {
         let split: SplitText | undefined;
         let cancelled = false;
-        gsap.from(".hero-fade", { opacity: 0, y: 12, duration: 0.8, delay: 0.45, stagger: 0.06, ease: "expo.out" });
         // Split only after the web fonts load, or the line breaks would be measured in the fallback font.
         document.fonts.ready.then(() => {
           if (cancelled) return;
@@ -26,6 +30,9 @@ export function HeroMotion({ children }: { children: ReactNode }) {
               type: "lines",
               mask: "lines",
               linesClass: "line",
+              // Lines keep whole words, so screen readers can read them as-is. The default ("auto")
+              // puts aria-label on the <p>, which isn't allowed on a paragraph.
+              aria: "none",
               // Re-split on resize; returning the tween lets SplitText keep it in sync instead of replaying.
               autoSplit: true,
               onSplit: (self) => {

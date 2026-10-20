@@ -9,12 +9,22 @@ import "./globals.css";
 
 // `template` applies to child segments: /work/fos titled "FOS" becomes "FOS — Abinash Adhikari".
 export const metadata: Metadata = {
+  // Turns relative URLs (like the generated /opengraph-image) into absolute ones for social cards.
+  metadataBase: new URL(site.url),
   title: {
     default: site.name,
     template: `%s — ${site.name}`,
   },
   description: site.description,
   authors: [{ name: site.name }],
+  openGraph: {
+    type: "website",
+    siteName: site.name,
+    locale: "en_US",
+    title: `${site.name} — ${site.role}`,
+    description: site.description,
+  },
+  twitter: { card: "summary_large_image" },
 };
 
 // The layout wraps every route and stays mounted across navigations,
@@ -28,9 +38,18 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body>
         <div id="top" className="relative">
+          {/* First focusable element: lets keyboard users jump past the header. */}
+          <a
+            href="#content"
+            className="label sr-only z-50 bg-background px-3 py-2 text-foreground focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
+          >
+            Skip to content
+          </a>
           <GridLines />
           <Header />
-          <div className="relative z-10">{children}</div>
+          <div id="content" className="relative z-10">
+            {children}
+          </div>
           <Footer />
         </div>
       </body>

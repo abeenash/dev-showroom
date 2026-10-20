@@ -11,6 +11,7 @@ import { Started } from "@/components/sections/Started";
 import { Videos } from "@/components/sections/Videos";
 import { Work } from "@/components/sections/Work";
 import { RevealRoot } from "@/components/motion/RevealRoot";
+import { AvatarGuide } from "@/components/avatar/AvatarGuide";
 
 // `absolute` skips the layout's "%s — Abinash Adhikari" template for the home page.
 export const metadata: Metadata = {
@@ -40,6 +41,8 @@ export default function Home() {
           <Contact n={n()} />
         </main>
       </RevealRoot>
+      {/* Last on purpose: its ScrollTriggers are created after every pin above, so they measure the final layout. */}
+      {site.features.avatarGuide && <AvatarGuide />}
     </>
   );
 }

@@ -1,15 +1,17 @@
 import Link from "next/link";
 import { site } from "@/content/site";
+import { videos } from "@/content/videos";
 import { Clock } from "@/components/ui/Clock";
 import { MarginLabel } from "@/components/ui/MarginLabel";
 import { OpenToWork } from "@/components/ui/OpenToWork";
 import { HeroMotion } from "@/components/motion/HeroMotion";
 
-// CV (PDF) and Videos links return once Abinash provides them (PROGRESS → MISSING).
-const links = [
+// "Videos" only shows while the Videos section exists. GitHub lives in Contact and the footer.
+// "CV (PDF)" returns when a public copy without phone numbers exists (PROGRESS → MISSING):
+// add { label: "CV (PDF)", href: site.cv, external: true } before Email.
+const links: { label: string; href: string; external?: boolean }[] = [
   { label: "Work", href: "/#work" },
-  { label: "Case study", href: "/work/fos" },
-  { label: "GitHub", href: site.github, external: true },
+  ...(videos.length > 0 ? [{ label: "Videos", href: "/#videos" }] : []),
   { label: "Email", href: `mailto:${site.email}` },
 ];
 

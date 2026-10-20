@@ -1,4 +1,4 @@
-// Paraphrased from the real FOS logbooks #5–#10 quoted in docs/FACTS.md. Never add new lines here.
+// Paraphrased from the real RMS logbooks #5–#10 quoted in docs/FACTS.md. Never add new lines here.
 import type { Note } from "./types";
 
 export const notes: Note[] = [
@@ -20,7 +20,7 @@ export const notes: Note[] = [
   {
     n: 8,
     date: "7 Sep 2026",
-    text: "Local notifications on a “FOS Live Alerts” channel. Built a WebSocket proxy as a practice workaround, not a production fix.",
+    text: "Local notifications on a dedicated live-alerts channel. Built a WebSocket proxy as a practice workaround, not a production fix.",
   },
   {
     n: 9,

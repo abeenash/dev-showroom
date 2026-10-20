@@ -98,7 +98,7 @@ End the walkthrough with: the `MISSING` list, the exact deploy and domain steps 
    - Below it, a one-line intro, with "● Open to work" and a live "It's 11:06 am in Lalitpur" clock on the right. The clock renders on the client only, with no placeholder time.
    - A bottom row of 4 vermilion links (Work, Videos, CV (PDF), Email) sits above a hairline.
 2. **Work rows:** two phone mockups side by side (flat CSS phone frame) with a Caveat note and ↑ arrow under them (e.g. "the totals had to match the POS to the rupee"). The text side has: a mono meta line, the title, a serif-italic subtitle, a paragraph, a vermilion left-ruled highlight, a stack line in mono, and a status (● SHIPPED / ○ IN PROGRESS / ○ MOCKUP) next to "Read the case study →".
-3. **Pinned story ("How the FOS app handles a *live* order"):** the phone pins on the left while 4 steps scroll on the right, with a vertical vermilion progress rule. Each step swaps the screen and overlays **HTML states** on the screenshot, such as an offline banner or a "NEW ORDER" toast. Don't bake these into new images. On mobile, don't pin; stack the steps instead.
+3. **Pinned story ("How the RMS app handles a *live* order"):** the phone pins on the left while 4 steps scroll on the right, with a vertical vermilion progress rule. Each step swaps the screen and overlays **HTML states** on the screenshot, such as an offline banner or a "NEW ORDER" toast. Don't bake these into new images. On mobile, don't pin; stack the steps instead.
 4. **Videos ("I *explain* what I build"):** paper-tone tiles with the duration in mono, the title in serif italic, and a round vermilion play button. Use a lite embed: the YouTube iframe loads only on click.
 5. **Notes from the *work*:** logbook entries in mono, scrolling horizontally on desktop (pinned and scrubbed) and stacked vertically on mobile.
 6. **About ("Learning by *building*"):** two paragraphs, a portrait (left out until Abinash sends one), and a "What I've shipped with" table.
@@ -113,7 +113,7 @@ End the walkthrough with: the `MISSING` list, the exact deploy and domain steps 
 The approved Lovable draft is at **`E:\abinash-adaptive-portfolio-main`** (TanStack Start + Vite). Its design and GSAP code are good, so port them to Next.js. Its *facts* are not trusted; see FACTS.md → "Known false claims".
 - **That folder is read-only.** Never edit, commit or push there. It's synced to Lovable, and touching its git history breaks the user's Lovable project.
 - Ignore `src/components/ui/*` (about 45 unused shadcn files), all the Radix, cmdk, recharts and vaul dependencies, and `lovable-error-reporting`, `error-capture` and `error-page`.
-- Its images are `*.asset.json` pointers to Lovable's CDN and won't work locally. Use original files in `public/shots/` instead. AMS screenshots are in `E:\ams\shots\`; FOS screenshots come from Abinash, cropped.
+- Its images are `*.asset.json` pointers to Lovable's CDN and won't work locally. Use original files in `public/shots/` instead. AMS screenshots are in `E:\ams\shots\`; RMS screenshots come from Abinash, cropped.
 
 | Lovable file | Next.js destination | What changes |
 | --- | --- | --- |

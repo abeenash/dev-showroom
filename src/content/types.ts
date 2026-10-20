@@ -24,7 +24,7 @@ export type Project = {
   hasCaseStudy?: boolean;
 };
 
-/** One step of the pinned FOS story. `overlay` is an HTML state drawn on top of the screenshot. */
+/** One step of the pinned RMS story. `overlay` is an HTML state drawn on top of the screenshot. */
 export type PinStep = {
   n: string;
   title: string;

@@ -32,7 +32,7 @@ Entry format:
 ---
 
 ### Phase 2 — Static image imports and typed content
-- **What it is:** `import fosOrder from "../../public/shots/fos/order.jpg"` gives you an object with the file's URL, width, height and a tiny blurred preview, all worked out at build time. Pass it to `next/image` and you get correct sizing (no layout shift), responsive `srcset`, modern formats and `placeholder="blur"` for free. Content lives in typed `.ts` files, so a typo in a project's `status` is a compile error, not a broken page.
+- **What it is:** `import rmsOrder from "../../public/shots/rms/order.jpg"` gives you an object with the file's URL, width, height and a tiny blurred preview, all worked out at build time. Pass it to `next/image` and you get correct sizing (no layout shift), responsive `srcset`, modern formats and `placeholder="blur"` for free. Content lives in typed `.ts` files, so a typo in a project's `status` is a compile error, not a broken page.
 - **Where it lives:** `src/content/projects.ts:2` (imports), `src/content/types.ts:7` (`Shot`), `src/components/ui/PhoneFrame.tsx:21` (`next/image` with `fill` + `sizes`), `scripts/prepare-images.mjs` (shrinking and blurring originals)
 - **Common mistake:** using a string path like `src="/shots/a.jpg"` and forgetting `width`/`height` (Next errors), or serving 5 MB originals and trusting `next/image` to fix it. It resizes on request, but the original still has to be read, and it never removes a phone number in the pixels.
 - **AMS bridge:** AMS web's static content (role names, nav items, notice categories) goes in typed `src/content/*.ts` files, while things that change (attendance, marks) come from the Spring Boot API.
@@ -72,7 +72,7 @@ Entry format:
 - **Where it lives:** `src/app/actions/contact.ts:32` (validate → honeypot → rate limit → insert), `src/components/sections/ContactForm.tsx:12` (`useActionState`), `src/db/schema.ts:4`, `src/db/index.ts:3`
 - **Common mistake:** trusting the browser. HTML `required` and `type="email"` are only hints; the action must validate again with zod, because anyone can POST to it directly. Also: never prefix a secret with `NEXT_PUBLIC_`, which ships it to every visitor.
 - **AMS bridge:** "Mark attendance", "Post notice" and "Save marks" in AMS web are Server Actions. The action calls the Spring Boot API with the teacher's token (instead of Drizzle), returns field errors to `useActionState`, then calls `revalidatePath("/attendance")` so the list refreshes.
-- **Your task (TODO(human)):** skipped in ship mode. Submit the form twice quickly with the same text and see both rows in Neon; then think about how you'd add an idempotency key, exactly like FOS orders.
+- **Your task (TODO(human)):** skipped in ship mode. Submit the form twice quickly with the same text and see both rows in Neon; then think about how you'd add an idempotency key, exactly like RMS orders.
 
 ---
 

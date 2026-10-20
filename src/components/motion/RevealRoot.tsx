@@ -24,7 +24,7 @@ export function RevealRoot({ children }: { children: ReactNode }) {
       });
       // Web fonts change line heights; re-measure every trigger once they're in.
       document.fonts.ready.then(() => ScrollTrigger.refresh());
-      // useGSAP also reverts everything created in here on unmount (e.g. navigating to /work/fos).
+      // useGSAP also reverts everything created in here on unmount (e.g. navigating to /work/rms).
       return () => mm.revert();
     },
     { scope: ref },

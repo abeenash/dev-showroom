@@ -1,4 +1,4 @@
-// Case-study copy. Every sentence traces to docs/FACTS.md (FOS section + logbooks #5–#10).
+// Case-study copy. Every sentence traces to docs/FACTS.md (RMS section + logbooks #5–#10).
 // Not here on purpose: the restaurant's backstory ("The problem") and plans ("What I'd do next"),
 // because FACTS doesn't have them yet (PROGRESS → MISSING). The company is never named.
 import { screens } from "./projects";
@@ -19,11 +19,11 @@ export type CaseStudy = {
 
 export const caseStudies: CaseStudy[] = [
   {
-    slug: "fos",
-    title: "FOS",
+    slug: "rms",
+    title: "RMS",
     tagline: { before: "A restaurant staff app, from code review to a", accent: "signed", after: "production build." },
     description:
-      "How I built FOS, a React Native restaurant staff app, during an internship: orders, live alerts, QR payments, printing, 12 pre-release fixes and 132 tests.",
+      "How I built RMS, a React Native restaurant management app for staff, during an internship: orders, live alerts, QR payments, printing, 12 pre-release fixes and 132 tests.",
     facts: [
       ["Role", "Mobile App Intern (React Native)"],
       ["Timeline", "6 Jul – 6 Oct 2026"],
@@ -48,14 +48,14 @@ export const caseStudies: CaseStudy[] = [
           "Optimistic UI: the screen updates straight away, with a clean rollback if the request fails.",
           "For QR payments, verification confirms payment, not an HTTP success. The app polls every 3 seconds, the session expires after 5 minutes, and it can retry. The backend is the source of truth for amounts.",
           "Printing goes through expo-print: it renders an HTML receipt and opens the system print dialog.",
-          "Local notifications on a “FOS Live Alerts” Android channel, with a toast fallback in Expo Go.",
+          "Local notifications on a dedicated Android channel for live alerts, with a toast fallback in Expo Go.",
         ],
       },
       {
         heading: "Live events (practice scope)",
         paragraphs: [
           "NEW_ORDER, PAYMENT_CONFIRMED and ORDER_CANCELLED arrive over STOMP on a per-tenant topic. The socket uses JWT auth, a 10-second heartbeat, and an exponential-backoff reconnect (2s up to 60s, at most 10 attempts), because fixed-interval reconnects hammer the server. Messages are de-duplicated by their STOMP message id, and the Authorization header is redacted from logs.",
-          "The catch: native apps can't send a browser Origin, so the backend refused the handshake. As a practice workaround, not a production fix, I wrote a small Node WebSocket proxy that injects the Origin and forwards subprotocols. Because that proxy is a single point of failure, the whole live pipeline sits behind an EXPO_PUBLIC_WS_ENABLED flag per build profile, and the flag fallback plus the offline banner keep the app healthy without it.",
+          "The catch: native apps can't send a browser Origin, so the backend refused the handshake. As a practice workaround, not a production fix, I wrote a small Node WebSocket proxy that injects the Origin and forwards subprotocols. Because that proxy is a single point of failure, the whole live pipeline sits behind an environment flag per build profile, and the flag fallback plus the offline banner keep the app healthy without it.",
         ],
       },
       {
@@ -82,7 +82,7 @@ export const caseStudies: CaseStudy[] = [
         ],
       },
     ],
-    shots: [screens.fosTables, screens.fosOrder],
+    shots: [screens.rmsTables, screens.rmsOrder],
   },
 ];
 

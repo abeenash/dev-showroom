@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRef, useState } from "react";
-import { fosSteps } from "@/content/projects";
+import { rmsSteps } from "@/content/projects";
 import type { PinStep } from "@/content/types";
 import { AccentHeading } from "@/components/ui/AccentHeading";
 import { PhoneFrame } from "@/components/ui/PhoneFrame";
@@ -14,7 +14,7 @@ function Overlay({ kind }: { kind?: PinStep["overlay"] }) {
     return (
       <div className="absolute inset-x-2 top-8 border bg-background p-3 font-mono text-xs leading-snug">
         <p className="text-accent-text">● NEW_ORDER</p>
-        <p className="mt-1">FOS Live Alerts</p>
+        <p className="mt-1">Live alert</p>
       </div>
     );
   if (kind === "offline")
@@ -27,7 +27,7 @@ function Overlay({ kind }: { kind?: PinStep["overlay"] }) {
 function Screens({ active }: { active: number }) {
   return (
     <PhoneFrame className="w-full">
-      {fosSteps.map((s, i) => (
+      {rmsSteps.map((s, i) => (
         <div
           key={i}
           className="absolute inset-0 transition-opacity duration-500"
@@ -93,7 +93,7 @@ export function PinnedStory({ n }: { n: string }) {
 
   return (
     <section ref={ref} id="story" aria-labelledby="pin-h" className="shell py-20 md:py-32">
-      <AccentHeading n={n} label="Signature" id="pin-h" before="How the FOS app handles a" accent="live" after="order" />
+      <AccentHeading n={n} label="Signature" id="pin-h" before="How the RMS app handles a" accent="live" after="order" />
 
       {/* Desktop with JS and motion: the phone pins while the steps scroll by. */}
       <div className="page-grid mt-20 hidden lg:motion-safe:js:grid">
@@ -107,7 +107,7 @@ export function PinnedStory({ n }: { n: string }) {
         <div className="relative col-span-5 col-start-8">
           <span className="pin-progress absolute top-0 left-0 h-full w-px origin-top bg-accent" aria-hidden />
           <ol className="pin-steps border-l">
-            {fosSteps.map((s, i) => (
+            {rmsSteps.map((s, i) => (
               <li key={s.n} className="pin-step flex min-h-[70vh] flex-col justify-center pl-10">
                 <p className={`label transition-colors ${active === i ? "text-accent-text" : ""}`}>Step {s.n}</p>
                 <h3 className="mt-3 text-3xl font-medium tracking-tight">{s.title}</h3>
@@ -124,7 +124,7 @@ export function PinnedStory({ n }: { n: string }) {
           <Screens active={active} />
         </div>
         <ol className="mt-10 border-t">
-          {fosSteps.map((s, i) => (
+          {rmsSteps.map((s, i) => (
             <li key={s.n} className="border-b">
               <button
                 type="button"

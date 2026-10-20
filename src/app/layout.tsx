@@ -7,7 +7,7 @@ import { site } from "@/content/site";
 import { fontVariables } from "@/lib/fonts";
 import "./globals.css";
 
-// `template` applies to child segments: /work/fos titled "FOS" becomes "FOS — Abinash Adhikari".
+// `template` applies to child segments: /work/rms titled "RMS" becomes "RMS — Abinash Adhikari".
 export const metadata: Metadata = {
   // Turns relative URLs (like the generated /opengraph-image) into absolute ones for social cards.
   metadataBase: new URL(site.url),

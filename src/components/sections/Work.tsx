@@ -87,7 +87,17 @@ export function Work({ n }: { n: string }) {
         <p className="label col-span-4 md:col-span-2">Also</p>
         <ul className="col-span-4 mt-3 space-y-1 text-sm text-muted-foreground md:col-span-10 md:mt-0">
           {smaller.map((s) => (
-            <li key={s}>{s}</li>
+            <li key={s.text}>
+              {s.text}
+              {s.href && (
+                <>
+                  {" · "}
+                  <a href={s.href} target="_blank" rel="noreferrer" className="link-draw font-mono text-xs text-accent-text">
+                    Live ↗
+                  </a>
+                </>
+              )}
+            </li>
           ))}
         </ul>
       </div>

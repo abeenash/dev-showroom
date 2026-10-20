@@ -7,9 +7,17 @@ export function Footer() {
         <p>
           Built with Next.js and GSAP in {site.city} · © {new Date().getFullYear()}
         </p>
-        <a href="#top" className="link-draw hover:text-foreground">
-          Back to top ↑
-        </a>
+        <div className="flex gap-6">
+          <a href={site.github} target="_blank" rel="noreferrer" className="link-draw hover:text-foreground">
+            GitHub ↗
+          </a>
+          <a href={site.linkedin} target="_blank" rel="noreferrer" className="link-draw hover:text-foreground">
+            LinkedIn ↗
+          </a>
+          <a href="#top" className="link-draw hover:text-foreground">
+            Back to top ↑
+          </a>
+        </div>
       </div>
     </footer>
   );

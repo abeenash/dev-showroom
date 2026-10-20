@@ -9,7 +9,7 @@ Written for Abinash after the ship-mode build (2026-10-20). Read it top to botto
 | URL | File | How it's rendered |
 | --- | --- | --- |
 | `/` | `src/app/page.tsx` | Static HTML at build time (`○`), plus small client islands |
-| `/work/fos` | `src/app/work/[slug]/page.tsx` | Static, one page per slug from `generateStaticParams` (`●`) |
+| `/work/rms` | `src/app/work/[slug]/page.tsx` | Static, one page per slug from `generateStaticParams` (`●`) |
 | `/playground/mood-journal`, `/weather-checker`, `/expense-tracker` | `src/app/playground/[slug]/page.tsx` | Static shell; the mini-app runs in the browser |
 | `/opengraph-image`, `/icon`, `/apple-icon` | `src/app/opengraph-image.tsx`, `icon.tsx`, `apple-icon.tsx` | PNGs drawn from JSX at build time |
 | `/sitemap.xml`, `/robots.txt` | `src/app/sitemap.ts`, `robots.ts` | Generated at build time |
@@ -26,7 +26,7 @@ Folders: `src/content/` holds every fact on the site (typed, from `docs/FACTS.md
 1. Vercel serves `/` as a ready-made HTML file. It was rendered once, during `npm run build`, from `src/app/page.tsx`, so there's no server work per visit.
 2. The HTML already contains every word and every `<img srcset>`. The root layout (`src/app/layout.tsx:32`) wrapped it with the header, grid lines and footer, and put a tiny inline script in `<head>` (`src/components/layout/ThemeScript.tsx:7`). That script runs before first paint: it applies a saved dark/light choice and adds the `js` class.
 3. The browser downloads only the JavaScript for the client islands: ThemeToggle, Clock, the motion wrappers, PinnedStory, Lightbox and ContactForm. React **hydrates** them, meaning it attaches to the HTML that's already there rather than re-drawing it.
-4. The Clock reads the time (it rendered nothing on the server on purpose, `src/components/ui/Clock.tsx:22`). GSAP splits the hero name into lines and slides them up (`src/components/motion/HeroMotion.tsx:21`), and ScrollTriggers pin the FOS phone and the logbook strip, but only on desktop with motion allowed (`gsap.matchMedia()`).
+4. The Clock reads the time (it rendered nothing on the server on purpose, `src/components/ui/Clock.tsx:22`). GSAP splits the hero name into lines and slides them up (`src/components/motion/HeroMotion.tsx:21`), and ScrollTriggers pin the RMS phone and the logbook strip, but only on desktop with motion allowed (`gsap.matchMedia()`).
 
 **The visitor sends a message.**
 1. `<form action={action}>` in `src/components/sections/ContactForm.tsx:28` posts the fields to the Server Action `sendMessage` (`src/app/actions/contact.ts:32`). With JS on, React does this with `fetch` and keeps the page; with JS off, the browser does a normal form POST. Both work.
@@ -76,7 +76,7 @@ Folders: `src/content/` holds every fact on the site (typed, from `docs/FACTS.md
 ### 7 — Animation libraries in the App Router
 - **What it is:** GSAP runs only in client wrappers. `useGSAP` records and reverts everything on unmount, and `gsap.matchMedia()` adds or removes pins as the screen size or reduced-motion setting changes. Tweens created after an `await` must go through `context.add()`.
 - **Where it lives:** `src/lib/gsap.ts`, `src/components/motion/HeroMotion.tsx:28`, `src/components/sections/PinnedStory.tsx:60`, `src/components/motion/HorizontalPin.tsx:14`
-- **Common mistake:** "ghost" ScrollTriggers after navigating, caused by tweens created outside the context. (Verified here: 2 pins on the home page → 0 on `/work/fos` → 2 after going back.)
+- **Common mistake:** "ghost" ScrollTriggers after navigating, caused by tweens created outside the context. (Verified here: 2 pins on the home page → 0 on `/work/rms` → 2 after going back.)
 - **AMS bridge:** chart or calendar libraries for AMS web get the same treatment: a thin client wrapper with data passed in.
 
 ### 8 — Images and fonts handled by the framework
@@ -105,13 +105,12 @@ Nothing on the site says "TODO"; these things are simply absent. Add the item an
 - **CV PDF**: put it at `public/abinash-adhikari-cv.pdf` and add a "CV (PDF)" link in `src/components/sections/Hero.tsx`.
 - **YouTube links**: add them to `src/content/videos.ts`; the Videos section appears automatically, numbered correctly.
 - **Your own handwritten margin notes** for the Work rows (only the Research line is live).
-- **FOS receipt screenshot**, with branding cropped (re-adds a "bill gets printed" step).
+- **RMS receipt screenshot**, with branding cropped (re-adds a "bill gets printed" step).
 - **Year of the BIM 5th-semester topper result.**
 - **Vendora / Bibhid live links**, and **Bibhid's year**.
 - **Growth Forum Nepal paper title.**
 - **Event name** for the hosting photo.
-- **The real FOS backstory** (what staff did before the app), for a "The problem" section in the case study.
-- **AMS teammate credit** and exactly which parts were yours.
+- **The real RMS backstory** (what staff did before the app), for a "The problem" section in the case study.
 - **Logbooks #1–#4**, if they exist.
 - **Domain name** → `NEXT_PUBLIC_SITE_URL`.
 - **A fresh OpenWeather key** → `OPENWEATHER_API_KEY` (the old one is public in the 2025 repo).
@@ -126,7 +125,7 @@ Nothing on the site says "TODO"; these things are simply absent. Add the item an
    - `DATABASE_URL`: the same Neon connection string as in your `.env.local`. The `messages` table already exists there; I ran the migration.
    - `NEXT_PUBLIC_SITE_URL`: `https://<your-domain>` with no trailing slash. Set it **before** the first deploy, because it's baked in at build time.
    - `OPENWEATHER_API_KEY`: a newly rotated key.
-4. **Deploy**, then open the `*.vercel.app` URL and check `/`, `/work/fos`, a playground app, and send yourself a test message.
+4. **Deploy**, then open the `*.vercel.app` URL and check `/`, `/work/rms`, a playground app, and send yourself a test message.
 5. **Custom domain.** Project → Settings → Domains → add `<your-domain>` (and `www.<your-domain>`, set to redirect to the apex). Vercel then shows the exact DNS records:
    - If your registrar lets you edit records: an **A** record for `@` and a **CNAME** for `www`, with the values Vercel displays.
    - If it only lets you set nameservers (common for `.com.np`): use `ns1.vercel-dns.com` and `ns2.vercel-dns.com`.

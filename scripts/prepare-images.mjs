@@ -10,11 +10,11 @@ const OUT = "public";
 
 /** @type {{ from: string; to: string; crop?: sharp.Region; blur?: sharp.Region[] }[]} */
 const jobs = [
-  // FOS (internship app). 002 shows a client menu banner with an address and phone number: blur it.
-  { from: "shots/rms/001_rms.jpg", to: "shots/fos/tables.jpg" },
+  // RMS (internship app). 002 shows a client menu banner with an address and phone number: blur it.
+  { from: "shots/rms/001_rms.jpg", to: "shots/rms/tables.jpg" },
   {
     from: "shots/rms/002_rms.jpg",
-    to: "shots/fos/order.jpg",
+    to: "shots/rms/order.jpg",
     blur: [{ left: 36, top: 1240, width: 490, height: 165 }],
   },
 

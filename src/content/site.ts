@@ -3,7 +3,7 @@ export const site = {
   name: "Abinash Adhikari",
   shortName: "A. Adhikari",
   role: "Mobile & Full-Stack Developer",
-  line: "I build mobile apps and the backends behind them.",
+  line: "I build mobile apps and the backends behind them, then I record myself explaining how they work.",
   city: "Lalitpur",
   location: "Nakkhu, Lalitpur, Nepal",
   timeZone: "Asia/Kathmandu",
@@ -11,7 +11,8 @@ export const site = {
   description: "Mobile & Full-Stack Developer based in Nakkhu, Lalitpur, Nepal.",
   email: "abeenashadheekaree77@gmail.com",
   github: "https://github.com/abeenash",
-  linkedin: "https://linkedin.com/in/abinash-adhikari",
-  // The domain isn't in FACTS, so it comes from the environment (set it in Vercel).
+  linkedin: "https://www.linkedin.com/in/abinash-adhikari-801148303",
+  cv: "/Abinash_Adhikari_CV.pdf",
+  // https://abinasha.com.np in production. Read from the environment (set it in Vercel), never hard-coded.
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
 } as const;

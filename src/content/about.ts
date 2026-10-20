@@ -6,7 +6,7 @@ import type { Shot } from "./types";
 export const about = {
   paragraphs: [
     "I'm studying for a Bachelor of Information Management at Orchid International College (2022–now). From July to October 2026 I was a mobile app intern, building a React Native staff app from code review to a signed production build.",
-    "Next I'm building the web side of AMS, the academic management system I'm making with a teammate, in Next.js. This site is where I learned it. I live in Nakkhu, Lalitpur.",
+    "Next I'm building the web side of AMS, the academic management system I'm building on my own, in Next.js. This site is where I learned it. I live in Nakkhu, Lalitpur.",
   ],
   portrait: { src: portrait, alt: "Abinash Adhikari in a dark suit and red tie, on stage" } satisfies Shot,
   hosting: { src: hosting, alt: "Abinash hosting an event at Orchid International College, holding a microphone" } satisfies Shot,

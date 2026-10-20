@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
-/* Phase 0: paper tokens and fonts only. The full Lovable design system
-   (dark theme, display/label/hand utilities, grid) is ported in phase 1. */
+/* Design system, ported from the Lovable draft (styles.css).
+   Fonts come from next/font (src/lib/fonts.ts) as CSS variables. */
 
 @theme inline {
   --color-background: var(--background);
@@ -9,27 +9,220 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
   --color-accent: var(--accent);
+  --color-accent-text: var(--accent-text);
+  --color-paper-2: var(--paper-2);
+  --color-ring: var(--accent);
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
   --font-serif: var(--font-instrument-serif), Georgia, serif;
-  --font-hand: var(--font-caveat), cursive;
+  --font-hand: var(--font-caveat), "Comic Sans MS", cursive;
 }
 
+/* Light (default). --accent-text is the accent darkened just enough to pass
+   AA (4.9:1) for small text; the brand vermilion stays for large type and rules. */
 :root {
   --background: #f4f1ea;
   --foreground: #1a1a17;
   --muted-foreground: #5e5a52;
   --border: #dedad0;
   --accent: #e4572e;
+  --accent-text: #b8401c;
+  --paper-2: #ebe7dd;
+  --phone: #1a1a17;
   color-scheme: light;
 }
 
+/* Dark: follows the system unless the visitor picked light with the toggle.
+   Works without JavaScript; the inline script in layout.tsx only adds data-theme
+   when there's a saved choice. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --background: #121210;
+    --foreground: #ece8df;
+    --muted-foreground: #a39e93;
+    --border: #2a2925;
+    --accent: #ff6b45;
+    --accent-text: #ff6b45;
+    --paper-2: #1b1b18;
+    --phone: #2e2d29;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --background: #121210;
+  --foreground: #ece8df;
+  --muted-foreground: #a39e93;
+  --border: #2a2925;
+  --accent: #ff6b45;
+  --accent-text: #ff6b45;
+  --paper-2: #1b1b18;
+  --phone: #2e2d29;
+  color-scheme: dark;
+}
+
 @layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html {
+    scroll-behavior: auto;
+  }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: var(--accent);
+    color: var(--background);
+  }
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+}
+
+/* Big editorial heading */
+@utility display {
+  font-size: clamp(3rem, 11vw, 8rem);
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+  font-weight: 500;
+}
+@utility h-section {
+  font-size: clamp(2.25rem, 6vw, 4.75rem);
+  line-height: 1;
+  letter-spacing: -0.035em;
+  font-weight: 500;
+}
+@utility accent-word {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--accent);
+}
+/* Mono margin labels. 0.75rem minimum (Lovable had 0.72rem). */
+@utility label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+@utility hand {
+  font-family: var(--font-hand);
+  font-size: 1.35rem;
+  line-height: 1.15;
+  color: var(--muted-foreground);
+}
+
+/* Underline that draws left -> right on hover */
+@utility link-draw {
+  position: relative;
+  text-decoration: none;
+  &::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -0.12em;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.45s cubic-bezier(0.19, 1, 0.22, 1);
+  }
+  &:hover::after,
+  &:focus-visible::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+}
+
+/* 4 columns on phones, 12 from md up */
+@utility page-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: 1rem;
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 1.5rem;
+  }
+}
+@utility shell {
+  width: 100%;
+  max-width: 88rem;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+  @media (min-width: 768px) {
+    padding-inline: 2.5rem;
+  }
+}
+
+/* Faint 12-column background lines (GridLines) */
+.grid-lines > div > span {
+  border-left: 1px solid color-mix(in oklab, var(--foreground) 5%, transparent);
+}
+.grid-lines > div > span:last-child {
+  border-right: 1px solid color-mix(in oklab, var(--foreground) 5%, transparent);
+}
+
+/* Flat CSS phone */
+@utility phone {
+  position: relative;
+  aspect-ratio: 785 / 1920;
+  border-radius: 2.1rem;
+  background: var(--phone);
+  padding: 0.55rem;
+  & > .phone-screen {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 1.65rem;
+    background: var(--paper-2);
+  }
+}
+
+.pulse-dot {
+  position: relative;
+}
+.pulse-dot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: currentColor;
+  animation: pulse 2.2s ease-out infinite;
+}
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  100% {
+    transform: scale(2.8);
+    opacity: 0;
+  }
+}
+
+/* Hide split targets until GSAP takes over (only when JS + motion are on).
+   Without JS the `js` class is never added, so headings are always visible. */
+html.js .split-pending {
+  visibility: hidden;
+}
+@media (prefers-reduced-motion: reduce) {
+  html.js .split-pending {
+    visibility: visible;
+  }
+  .pulse-dot::after {
+    animation: none;
+  }
+  .link-draw::after {
+    transition: none;
   }
 }

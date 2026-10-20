@@ -66,3 +66,12 @@ Entry format:
 - **Your task (TODO(human)):** skipped in ship mode. Add an `ams` entry to `caseStudies` (FACTS only), set `hasCaseStudy: true` on AMS, and run `npm run build`: a second `●` route appears.
 
 ---
+
+### Phase 6 — Server Actions, `useActionState`, and a database with Drizzle
+- **What it is:** A **Server Action** is an `async` function in a `"use server"` file. Pass it to `<form action={...}>` and Next.js wires up the POST for you: no API route, no `fetch`. `useActionState(action, initial)` gives the component the action's last return value (errors, success) plus a `pending` flag. **Drizzle** (a typed SQL toolkit) turns `schema.ts` into SQL migrations (`npm run db:generate`) and applies them (`npm run db:migrate`). `import "server-only"` makes the build fail if client code ever imports the DB.
+- **Where it lives:** `src/app/actions/contact.ts:33` (validate → honeypot → rate limit → insert), `src/components/sections/ContactForm.tsx:12` (`useActionState`), `src/db/schema.ts:4`, `src/db/index.ts:3`
+- **Common mistake:** trusting the browser. HTML `required` and `type="email"` are only hints; the action must validate again with zod, because anyone can POST to it directly. Also: never prefix a secret with `NEXT_PUBLIC_`, which ships it to every visitor.
+- **AMS bridge:** "Mark attendance", "Post notice" and "Save marks" in AMS web are Server Actions. The action calls the Spring Boot API with the teacher's token (instead of Drizzle), returns field errors to `useActionState`, then calls `revalidatePath("/attendance")` so the list refreshes.
+- **Your task (TODO(human)):** skipped in ship mode. Submit the form twice quickly with the same text and see both rows in Neon; then think about how you'd add an idempotency key, exactly like FOS orders.
+
+---

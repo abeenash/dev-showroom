@@ -1,11 +1,15 @@
 import { site } from "@/content/site";
 import { AccentHeading } from "@/components/ui/AccentHeading";
+import { ContactForm } from "./ContactForm";
 
 export function Contact({ n }: { n: string }) {
   return (
     <section id="contact" aria-labelledby="contact-h" className="shell py-20 md:py-32">
       <AccentHeading n={n} label="Contact" id="contact-h" before="Have something" accent="worth" after="building?" display />
       <div className="page-grid mt-16 gap-y-12">
+        <div className="col-span-4 md:col-span-6 md:col-start-3">
+          <ContactForm />
+        </div>
         <ul className="col-span-4 space-y-3 font-mono text-sm md:col-span-3 md:col-start-10">
           <li>
             <a className="link-draw break-all text-accent-text" href={`mailto:${site.email}`}>

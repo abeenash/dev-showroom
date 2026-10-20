@@ -48,3 +48,12 @@ Entry format:
 - **Your task (TODO(human)):** skipped in ship mode. Turn off JavaScript in DevTools and scroll the home page: everything should still read.
 
 ---
+
+### Phase 4 — Animation libraries in the App Router (client wrappers + cleanup)
+- **What it is:** GSAP needs `window`, so it only runs in `"use client"` files. Instead of turning whole sections into client components, small wrappers (`RevealRoot`, `HeroMotion`, `HorizontalPin`) take server-rendered `children` and only add behaviour. `useGSAP` (GSAP's React hook) records every tween and ScrollTrigger made inside it and reverts them on unmount, which is what keeps client-side navigation clean. `gsap.matchMedia()` runs code only while a media query matches and undoes it when it stops matching (resize, reduced motion).
+- **Where it lives:** `src/lib/gsap.ts:8` (register plugins only in the browser), `src/components/motion/HeroMotion.tsx:21` (`context.add` for tweens created after `await`), `src/components/sections/PinnedStory.tsx:56` (pin + progress)
+- **Common mistake:** creating animations inside a `.then()` or `setTimeout` without `context.add(...)`. They escape cleanup, and after a navigation you get "ghost" ScrollTriggers that pin elements that no longer exist.
+- **AMS bridge:** the same pattern fits any browser-only library in AMS web (a chart library for attendance stats, a rich-text editor for notices): a thin client wrapper, server data passed in as props or children.
+- **Your task (TODO(human)):** skipped in ship mode. In `RevealRoot.tsx`, change `y: 28` to `y: 60` and watch how much heavier the page feels; then put it back.
+
+---

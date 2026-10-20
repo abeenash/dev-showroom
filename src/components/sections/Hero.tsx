@@ -3,6 +3,7 @@ import { site } from "@/content/site";
 import { Clock } from "@/components/ui/Clock";
 import { MarginLabel } from "@/components/ui/MarginLabel";
 import { OpenToWork } from "@/components/ui/OpenToWork";
+import { HeroMotion } from "@/components/motion/HeroMotion";
 
 // CV (PDF) and Videos links return once Abinash provides them (PROGRESS → MISSING).
 const links = [
@@ -13,12 +14,13 @@ const links = [
 ];
 
 // A Server Component: the HTML arrives complete. `split-pending` + `hero-fade` are hooks
-// for the client-side animation (motion/HeroMotion), which only hides them when JS runs.
+// for the client-side animation (motion/HeroMotion); CSS only hides them while JS runs.
 export function Hero() {
   const [first, last] = site.name.split(" ");
 
   return (
     <section aria-label="Introduction" className="shell relative pb-20 md:pb-28">
+      <HeroMotion>
       <div className="page-grid mt-16 md:mt-28">
         <div className="hero-fade col-span-4 mb-6 md:col-span-2 md:mb-0 md:pt-4">
           <MarginLabel n="00">Hello</MarginLabel>
@@ -58,6 +60,7 @@ export function Hero() {
           </li>
         ))}
       </ul>
+      </HeroMotion>
     </section>
   );
 }

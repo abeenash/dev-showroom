@@ -1,5 +1,6 @@
 import { notes } from "@/content/logbook";
 import { AccentHeading } from "@/components/ui/AccentHeading";
+import { HorizontalPin } from "@/components/motion/HorizontalPin";
 
 // The horizontal, pinned layout needs desktop + JS + motion (`lg:motion-safe:js:`), because
 // motion/HorizontalPin scrubs it sideways. Everywhere else it's a plain grid, so nothing is clipped.
@@ -7,6 +8,7 @@ import { AccentHeading } from "@/components/ui/AccentHeading";
 export function Notes({ n }: { n: string }) {
   return (
     <section id="notes" aria-labelledby="notes-h" className="overflow-hidden">
+      <HorizontalPin>
       <div className="notes-pin flex flex-col justify-center py-20 lg:motion-safe:js:min-h-screen lg:motion-safe:js:py-0">
         <div className="shell">
           <AccentHeading n={n} label="Notes" id="notes-h" before="Notes from the" accent="work" />
@@ -25,6 +27,7 @@ export function Notes({ n }: { n: string }) {
           ))}
         </ol>
       </div>
+      </HorizontalPin>
     </section>
   );
 }

@@ -218,6 +218,13 @@
    Without JS the `js` class is never added, so headings are always visible. */
 html.js .split-pending {
   visibility: hidden;
+  /* Fail-safe: if GSAP never runs (script error, very slow network), show the text after 2.5s anyway. */
+  animation: split-failsafe 0s 2.5s forwards;
+}
+@keyframes split-failsafe {
+  to {
+    visibility: visible;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   html.js .split-pending {

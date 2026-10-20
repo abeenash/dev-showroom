@@ -9,6 +9,7 @@ import { PinnedStory } from "@/components/sections/PinnedStory";
 import { Recognition } from "@/components/sections/Recognition";
 import { Videos } from "@/components/sections/Videos";
 import { Work } from "@/components/sections/Work";
+import { RevealRoot } from "@/components/motion/RevealRoot";
 
 // `absolute` skips the layout's "%s — Abinash Adhikari" template for the home page.
 export const metadata: Metadata = {
@@ -26,15 +27,17 @@ export default function Home() {
   return (
     <>
       <Hero />
-      <main>
-        <Work n={n()} />
-        <PinnedStory n={n()} />
-        {videos.length > 0 && <Videos n={n()} />}
-        <Notes n={n()} />
-        <About n={n()} />
-        <Recognition n={n()} />
-        <Contact n={n()} />
-      </main>
+      <RevealRoot>
+        <main>
+          <Work n={n()} />
+          <PinnedStory n={n()} />
+          {videos.length > 0 && <Videos n={n()} />}
+          <Notes n={n()} />
+          <About n={n()} />
+          <Recognition n={n()} />
+          <Contact n={n()} />
+        </main>
+      </RevealRoot>
     </>
   );
 }

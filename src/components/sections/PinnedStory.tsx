@@ -1,11 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { fosSteps } from "@/content/projects";
 import type { PinStep } from "@/content/types";
 import { AccentHeading } from "@/components/ui/AccentHeading";
 import { PhoneFrame } from "@/components/ui/PhoneFrame";
+import { gsap, MQ, ScrollTrigger, useGSAP } from "@/lib/gsap";
 
 // HTML states drawn over the real screenshot (never baked into new images).
 function Overlay({ kind }: { kind?: PinStep["overlay"] }) {
@@ -49,13 +50,56 @@ function Screens({ active }: { active: number }) {
 }
 
 export function PinnedStory({ n }: { n: string }) {
+  const ref = useRef<HTMLElement>(null);
   const [active, setActive] = useState(0);
 
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+      // Same condition as the `lg:motion-safe:js:grid` layout below.
+      mm.add(`${MQ.desktop} and ${MQ.motion}`, () => {
+        ScrollTrigger.create({
+          trigger: ".pin-steps",
+          start: "top top",
+          end: "bottom bottom",
+          pin: ".pin-phone",
+          pinSpacing: false,
+        });
+        // The vermilion rule grows with progress (scaleY = transform only, no layout work).
+        gsap.fromTo(
+          ".pin-progress",
+          { scaleY: 0 },
+          {
+            scaleY: 1,
+            ease: "none",
+            scrollTrigger: { trigger: ".pin-steps", start: "top center", end: "bottom center", scrub: true },
+          },
+        );
+        gsap.utils.toArray<HTMLElement>(".pin-step").forEach((el, i) => {
+          // Whichever step crosses 60% of the viewport swaps the phone's screen.
+          ScrollTrigger.create({
+            trigger: el,
+            start: "top 60%",
+            end: "bottom 60%",
+            onToggle: (self) => self.isActive && setActive(i),
+          });
+          gsap.fromTo(
+            el,
+            { opacity: 0.25 },
+            { opacity: 1, scrollTrigger: { trigger: el, start: "top 75%", end: "top 50%", scrub: true } },
+          );
+        });
+      });
+      return () => mm.revert();
+    },
+    { scope: ref },
+  );
+
   return (
-    <section id="story" aria-labelledby="pin-h" className="shell py-20 md:py-32">
+    <section ref={ref} id="story" aria-labelledby="pin-h" className="shell py-20 md:py-32">
       <AccentHeading n={n} label="Signature" id="pin-h" before="How the FOS app handles a" accent="live" after="order" />
 
-      {/* Desktop with JS and motion: the phone pins while the steps scroll by (wired up in phase 4). */}
+      {/* Desktop with JS and motion: the phone pins while the steps scroll by. */}
       <div className="page-grid mt-20 hidden lg:motion-safe:js:grid">
         <div className="col-span-4 col-start-3">
           <div className="pin-phone flex h-screen items-center">

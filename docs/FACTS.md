@@ -1,6 +1,6 @@
 # FACTS — the only source of truth for site copy
 
-Everything on the site must trace back to this file. If a fact isn't here, render `TODO(abinash): …` and ask.
+Everything on the site must trace back to this file. If a fact isn't here, leave that element out (see AGENTS.md → Content truth rules) and add it to the MISSING list.
 Sources: CV (Oct 2026), the FOS repo and its logbooks #5–#10, the AMS repo, and Abinash's answers in chat.
 Status: ✅ verified · ❓ needs Abinash
 
@@ -9,9 +9,9 @@ Status: ✅ verified · ❓ needs Abinash
 - ✅ Role title: Mobile & Full-Stack Developer
 - ✅ Based in Nakkhu, Lalitpur, Nepal
 - ✅ Email (from CV): abeenashadheekaree77@gmail.com
-- ❓ Custom domain name (registered; the name isn't confirmed yet). Lovable used `abinashadhikari.com.np`, which is unconfirmed.
+- ✅ Custom domain: registered by Abinash, but the name isn't in this file. Read it from the `NEXT_PUBLIC_SITE_URL` env var; never hard-code it. Lovable's `abinashadhikari.com.np` is unconfirmed.
 - ❓ Whether to show a domain email (e.g. hello@…) instead of the Gmail address
-- ❓ Portrait photo
+- ✅ Portrait: `public/abinash_details/pictures/001main_portfolio_picture.jpeg` (suit, red tie, on stage)
 - ❌ Don't publish the phone number.
 
 ## Education
@@ -48,7 +48,7 @@ Status: ✅ verified · ❓ needs Abinash
 - ✅ The plan is to build the AMS web side with Next.js later
 - ❓ YouTube walkthrough link
 
-### Vendora SIMS — status: ❓ (shipped? where?)
+### Vendora SIMS — status: BUILT (2026, screenshots in public/shots/vendora). ❓ Live link
 - ✅ Full-stack web app: Laravel + React + Inertia.js, containerized with Docker
 - ❓ Year, screenshots, live link
 
@@ -72,13 +72,34 @@ Status: ✅ verified · ❓ needs Abinash
 - **#10 — 13 Sep 2026:** Production app bundle validated. The WebSocket proxy is a single point of failure, so a flag fallback and the offline banner keep the app healthy.
 - ❓ Logbooks #1–#4 aren't in the repo. Add them if they exist.
 
-## Recognition
-- ✅ Tribhuvan University topper, BIM 1st semester. ❓ Year
-- ✅ Academic certificates for BIM 3rd, 5th and 6th semesters. ❓ Exact title of each (topper? distinction?) and years
-- ✅ Fundamentals of Cloud Computing certificate. ❓ Issuer and year
-- ✅ STEAM research capacity-building workshop (participant). ❓ Year
-- ✅ Research conferences organized and attended. ❓ Names, roles, years
-- Scans are coming (CamScanner). Blur registration, symbol and roll numbers and any date of birth.
+## Recognition (✅ verified from certificates in `public/abinash_details/`)
+Dates on Orchid certificates are in Bikram Sambat (BS). AD years below are conversions; show AD.
+1. **Tribhuvan University topper — BIM 1st semester, SGPA 4.0** (2079 batch). Orchid certificate "University topper, SGPA-4 … BIM I Semester Result 2080", dated 2080-08-11 BS (≈ Nov 2023). Evidence: `certificates/Screenshot 2026-10-20 130631.png`, poster `pictures/006bim_1stsem_res.jpeg`, felicitation photos `pictures/007acknowledgement.jpeg` and `008acknowledgement_two.jpeg`. **This is the headline row.**
+2. **TU 2nd topper — BIM 3rd semester, SGPA 3.98.** Dated 2081-05-17 BS (≈ Sep 2024). Evidence: `certificates/Screenshot 2026-10-20 130637.png` (photo of the framed certificate)
+3. **Topper — BIM 5th semester, SGPA 3.97** (college announcement poster; no certificate). ❓ Year (likely 2025). Evidence: `pictures/004bim_5th_sem_poster.jpeg`
+4. **TU 2nd topper — BIM 6th semester, SGPA 3.97.** Dated 2082-12-05 BS (≈ Mar 2026). Evidence: `certificates/Screenshot 2026-10-20 130646.png`
+5. **2nd Runner-Up, BizBuzz 2026**, as a member of Orchid International College's team. The event was organized by Kathford International College, and the team won a Rs. 10,000 prize cheque. Evidence: `certificates/Screenshot 2026-10-20 130613.png`, photo with the trophy `pictures/005bizbuzz_2ndrunnerup_photo.jpeg`
+6. **Presented a case paper at Growth Forum Nepal** (an international conference on economic growth, organized by Embark College), 8 May 2026, Hotel Himalaya, Lalitpur. The slide in the photo is a market analysis for "Rakura" (Nepal tea exports). ❓ Paper title. Evidence: `certificates/Screenshot 2026-10-20 130605.png`, stage photo `pictures/002for_the_background.jpeg`
+7. **Participant — International Conference on Contemporary Research 2026 (ICCR-2026)**, theme "Emerging Trends in Sustainability: Integrating Multidisciplinary Research". 16 May 2026, Southwestern State College, Kathmandu; organized by STEAM Research Centre. Evidence: `certificates/001_research.png`
+8. **Participant — Capacity Building Workshop on Scientific Paper Writing for Researchers** (STEAM Research Centre, Professional Development Series 2026), 11 April 2026, Embark College, Lalitpur. Evidence: `certificates/Screenshot 2026-10-20 130557.png`
+- ❌ Fundamentals of Cloud Computing: the certificate hasn't been found yet, so leave it out.
+- ❌ "Organized research conferences": there's no evidence, so don't claim it.
+- Suggested grouping: **Academics** (1–4), **Competitions** (5), **Research** (6–8). The Research row keeps its handwritten line "Being a developer takes research too." (Abinash's words.)
+
+## Photos (✅ Abinash's own; use them, they make the site human)
+- `001main_portfolio_picture.jpeg`: the main portrait (About section, and the OG image if it suits)
+- `002for_the_background.jpeg`: presenting at Growth Forum Nepal (a natural fit beside the Research row)
+- `003hosting_the_attendance_pic.jpeg`: hosting an Orchid College event on stage with a mic (About, as a human moment). ❓ Event name
+- `005bizbuzz_2ndrunnerup_photo.jpeg`: with the BizBuzz trophy
+- `007` / `008acknowledgement*.jpeg`: being felicitated for the TU topper result. These include college staff, so use only in the Recognition lightbox, not as big hero images.
+- `004` / `006`: college congratulation posters. Use as lightbox evidence only; their style clashes with the site.
+
+## Screenshots (✅ provided; prepare them before use)
+- **FOS** (`public/shots/rms/`): `001_rms.jpg` is the table dashboard (clean) and `002_rms.jpg` is the Table 4 order screen. **`002` shows a "Fish Station" menu banner with a real US address and phone number.** Blur that area (about x 46–515, y 1254–1393 on the 1080×2640 original) in the web copy and check the result by viewing the image. There's no receipt screenshot yet, so the pinned story's "bill gets printed" step uses an HTML overlay or is dropped.
+- **AMS** (`public/shots/ams/`): `003` attendance history, `004` teacher's "Attendance submitted", `005` offline error state with "You're offline. Showing saved data." All clean.
+- **Vendora** (`public/shots/vendora/`): screenshots dated Feb 2026, so the project year is **2026** (not 2025). Several show a Windows "Activate Windows" watermark at the bottom right: crop it, or prefer the shots without it. Customer names and phone numbers in "Add sale" are seed data, but prefer other shots anyway.
+- **Bibhid** (`public/shots/bibhid/`): storefront, login (Google OAuth button) and admin dashboard. Seed data only.
+- **Image prep (phase 2):** the originals are huge (up to 4284×5712, 18 MB in total). Move the raw files to `assets-src/` (not served), then generate web copies into `public/` (long edge ≤ 2000px, quality ~80, kebab-case names with no spaces) using `sharp`, which comes with Next.js. Every image must go through `next/image`.
 
 ## Known false or unverified claims in the Lovable draft — never copy these
 - "Fixed 15+ real-world failures" → it's **12 fixes**
@@ -90,7 +111,7 @@ Status: ✅ verified · ❓ needs Abinash
 - Award years (2023, 2024–26, 2025) are guesses. Video lengths (08:42, 11:05, 06:18) are made up.
 - `hello@abinashadhikari.com.np` and `youtube.com/@abinashadhikari` are unconfirmed.
 - AMS: "I'm on the mobile side and half the API" is unconfirmed.
-- **Handwritten margin notes** ("the totals had to match the POS to the rupee", "grouping by day was a teacher's idea, not mine") were invented by Lovable. Keep the style, but Abinash writes the real notes himself: a `TODO(human)` in the content phase.
+- **Handwritten margin notes** ("the totals had to match the POS to the rupee", "grouping by day was a teacher's idea, not mine") were invented by Lovable. Keep the style, but only with notes Abinash wrote himself. Until he sends them, show no handwritten notes.
 
 ## Videos
 - ❓ Links live in the GitHub READMEs. Narration is mixed English and Nepali. Captions and timestamps come later.

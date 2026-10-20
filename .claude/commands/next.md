@@ -1,11 +1,7 @@
 ---
-description: Continue the portfolio build with the next unfinished phase
+description: Continue the build in ship mode from wherever it stopped
 ---
 
-Follow the "Start and end of every session" rules in AGENTS.md exactly.
+Follow AGENTS.md (ship mode). Read AGENTS.md, docs/PROGRESS.md and docs/FACTS.md, and check `git status` and `git log --oneline -10`. Tell me in 2 lines where the build stopped. Then continue with every remaining unticked phase without pausing, committing after each. Finish by writing or updating docs/WALKTHROUGH.md and giving me the chat summary described in /ship.
 
-1. Read AGENTS.md, docs/PROGRESS.md and docs/FACTS.md. Check `git status` and `git log --oneline -10`.
-2. Tell me in 3–5 lines where we are and which phase is next. $ARGUMENTS
-3. Give the concept brief for that phase (teaching mode), then build only that phase.
-4. Leave exactly one TODO(human) task for me and wait for my code before finishing the phase.
-5. Then: lint, build, update PROGRESS.md and LEARNING.md, and commit as `phase N: …`.
+$ARGUMENTS

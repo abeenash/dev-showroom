@@ -10,45 +10,54 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 # Abinash Adhikari — portfolio
 
-This is the personal portfolio of Abinash Adhikari, a **Mobile & Full-Stack Developer** from Nakkhu, Lalitpur, Nepal. It's built with Claude Code over many short sessions. This file is the memory between those sessions: read it fully at the start of every session.
+This is the personal portfolio of Abinash Adhikari, a **Mobile & Full-Stack Developer** from Nakkhu, Lalitpur, Nepal. Read this file fully at the start of every session. It's the memory between sessions.
 
-## Start and end of every session (non-negotiable)
+## Working mode: SHIP MODE (build first, teach at the end)
 
-**At the start:**
-1. Read this file, `docs/PROGRESS.md` and `docs/FACTS.md`.
-2. Run `git status` and `git log --oneline -10`. If there are uncommitted changes you didn't make, stop and ask about them.
-3. Tell Abinash in 3–5 lines: which phase we're in, what was done last, and what you'll do now. Then do only that.
+The goal is to **ship today**. Abinash also has AMS to work on, so don't build step by step with pauses.
+- **Build autonomously.** Run every phase in `docs/PROGRESS.md` back to back in one go. Don't stop for concept briefs, don't leave `TODO(human)` tasks, and don't ask for approval between phases. (If Abinash left a `TODO(human)` unfinished, finish it yourself and explain it in the walkthrough.)
+- **Stop only for real blockers:** a secret Abinash must create himself (like `DATABASE_URL`), a login (Vercel, Neon), or a destructive or irreversible action. Everything else gets decided with the rules below and recorded in the PROGRESS log.
+- **Commit at every phase boundary.** Each commit is a checkpoint and the safety net:
+  1. Run `npm run lint` and `npm run build`. Both must pass before the commit.
+  2. Commit as `phase N: <what changed>`.
+  3. Tick the phase in PROGRESS and add one log line.
+  Never push or deploy unless asked.
+- **Teach at the end.** When the build is done, write `docs/WALKTHROUGH.md`, then summarize it in chat (format below).
 
-**At the end:**
-1. Run `npm run lint` and `npm run build`. Both must pass. If they don't, fix it or say plainly what's broken.
-2. Update `docs/PROGRESS.md`: tick the boxes, add a dated session-log entry, and move new open questions to the list.
-3. Add this session's Next.js lessons to `docs/LEARNING.md` (format below).
-4. Commit with the message `phase N: <what changed>`. Commit only; never push unless asked.
+**At the start of a session:** read this file, `docs/PROGRESS.md` and `docs/FACTS.md`, then run `git status` and `git log --oneline -10`. Uncommitted changes left by an earlier Claude session for an unticked phase are part of the work: review them, keep the good parts and carry on. Don't ask about them.
 
 ## Rules that protect earlier work
 
-- **Work on one phase at a time.** Touch only the files the current phase needs.
-- **Finished phases are locked.** Don't restyle, rename, refactor or "clean up" anything from a ticked phase unless Abinash asks. If a later phase needs a change there, say so first, make the smallest change possible, and record it in the PROGRESS log.
-- **Locked decisions** (below) aren't re-debated. Propose a change in chat; don't just do it.
-- Keep the one-component-per-job structure in the layout below. Don't create a parallel second version of something that already exists; find it and reuse it.
-- Don't add dependencies without saying why in the session log. Use no UI kits (shadcn, MUI, DaisyUI), no Framer Motion and no three.js.
+- **Finished (ticked) phases are locked.** Don't restyle, rename or "clean up" their code unless Abinash asks. If a later phase truly needs a change there, make the smallest change possible and note it in the PROGRESS log.
+- **Locked decisions** (below) aren't re-debated.
+- Keep one component per job (see the project layout). Find and reuse existing pieces; never build a second version of something.
+- Don't add dependencies beyond the ones the plan needs (gsap, @gsap/react, drizzle-orm, drizzle-kit, @neondatabase/serverless, zod, server-only). Use no UI kits, no Framer Motion and no three.js.
 
-## Content truth rules
+## Content truth rules (the live site must look finished)
 
-- **Every fact on the site must come from `docs/FACTS.md`.** That covers dates, numbers, features, roles, awards and quotes.
-- If something isn't there, never invent it. Render a visible `TODO(abinash): …` placeholder and add the question to PROGRESS → Open questions.
-- Logbook entries on the site are paraphrased from the real logbooks quoted in FACTS. Never write new "logbook" lines.
-- **Never name the internship company.** Not in the copy, alt text, metadata, file names or code comments. Screenshots must have the client branding (restaurant name, logo, phone number) cropped or blurred, and no visible emails or passwords.
+- **Every fact on the site must come from `docs/FACTS.md`.** That covers dates, numbers, features, roles, awards and quotes. Never invent anything.
+- **No visible `TODO` text on the live site.** If a fact or asset is missing, **leave that element out cleanly**:
+  - no award year → hide the year column
+  - no video ID → don't render that video, and hide the whole Videos section if none are left
+  - no certificate scan → no "view" link
+  - no screenshot → use the serif-italic name placeholder tile from the Lovable design
+  - no portrait → the About section goes without one
+  - no handwritten note → no note
+- Record everything you left out in a `MISSING` list in PROGRESS and in the walkthrough, so Abinash can fill it in later (a content-only change).
+- Logbook entries on the site are paraphrased only from the real logbooks quoted in FACTS (#5–#10). Never write new ones.
+- **Never name the internship company.** Not in the copy, alt text, metadata, file names or code comments. Screenshots must have the client branding (restaurant name, logo, phone number) cropped or blurred, and no visible emails or passwords. If you can't confirm a screenshot is clean, don't use it.
 - Features described as "practice scope" in FACTS must be called that, or described as built and tested, not running in production.
 
-## Teaching mode (Abinash is learning Next.js)
+## The end-of-build walkthrough (`docs/WALKTHROUGH.md`)
 
-Abinash will build the AMS web app with Next.js next, so this project is also his Next.js course.
-- **Before coding a phase:** give a short concept brief, under 15 lines. Say what the Next.js feature is, why we use it here, and what the alternative would be.
-- **During the phase:** leave **one** small, well-scoped piece for him to write himself, marked `TODO(human)`, with a clear spec. Wait for him, then review his code kindly and specifically.
-- **After the phase:** append to `docs/LEARNING.md`:
-  `### Phase N — <concept>` · what it is (2–3 lines) · where it lives (`path:line`) · common mistake · **AMS bridge:** how the same idea applies to AMS web.
-- Explain in plain English and define every new term once. Don't assume knowledge he hasn't shown.
+Abinash is learning Next.js for AMS web, so explain it like a patient senior dev walking a junior through a pull request. Use plain English and define every new term once. For **each phase** include:
+1. **What I built:** the files (as `path:line` links) and what each one does, in 2–4 lines.
+2. **What happens at runtime:** the actual flow, step by step. Examples: "you open `/` → Next renders `page.tsx` on the server → the HTML arrives already filled in → the browser loads only the JS for client components → `useGSAP` runs → …". For the contact form: browser → Server Action → zod → Drizzle → Neon → the response comes back.
+3. **Why this way:** the Next.js concept, the alternative, and the trade-off. Include **"Lovable/TanStack did X → Next.js does Y"** where it applies.
+4. **Try it yourself:** one small change he can make to see the concept move (e.g. "add `"use client"` to X and watch the bundle grow").
+5. **AMS bridge:** where the same idea shows up when AMS web is built in Next.js.
+
+End the walkthrough with: the `MISSING` list, the exact deploy and domain steps Abinash must do himself, and anything you weren't sure about.
 
 ## Locked decisions
 
@@ -92,7 +101,7 @@ Abinash will build the AMS web app with Next.js next, so this project is also hi
 3. **Pinned story ("How the FOS app handles a *live* order"):** the phone pins on the left while 4 steps scroll on the right, with a vertical vermilion progress rule. Each step swaps the screen and overlays **HTML states** on the screenshot, such as an offline banner or a "NEW ORDER" toast. Don't bake these into new images. On mobile, don't pin; stack the steps instead.
 4. **Videos ("I *explain* what I build"):** paper-tone tiles with the duration in mono, the title in serif italic, and a round vermilion play button. Use a lite embed: the YouTube iframe loads only on click.
 5. **Notes from the *work*:** logbook entries in mono, scrolling horizontally on desktop (pinned and scrubbed) and stacked vertically on mobile.
-6. **About ("Learning by *building*"):** two paragraphs, a portrait (TODO until Abinash sends one), and a "What I've shipped with" table.
+6. **About ("Learning by *building*"):** two paragraphs, a portrait (left out until Abinash sends one), and a "What I've shipped with" table.
 7. **Recognition ("*Not to brag,* but…"):** a typographic list with the year in mono, the title, a sub-line and a "view" link that opens a lightbox. The first row is larger.
 8. **Where I started:** three small paper tiles linking to the ported mini-projects.
 9. **Contact ("Have something *worth* building?"):** underline-only fields, a black "Send message →" button, and the email, LinkedIn and GitHub links.
@@ -122,7 +131,7 @@ The approved Lovable draft is at **`E:\abinash-adaptive-portfolio-main`** (TanSt
 | `src/components/Contact.tsx` + `lib/contact.functions.ts` | `sections/Contact.tsx` + `src/app/actions/contact.ts` | `createServerFn` becomes a **Server Action** with zod, plus `useActionState`, a honeypot and a Drizzle insert (phase 6). |
 | `src/content/*` | `src/content/*` | Rebuild from FACTS.md. Keep the types (`Project`, `Shot`, `PinStep`, `Video`, `Note`, `Award`). |
 
-**Teaching bonus:** each row is a lesson. In every phase's concept brief, show "TanStack Start did X → Next.js does Y, because Z".
+**Teaching bonus:** each row is a lesson. In the walkthrough, show "TanStack Start did X → Next.js does Y, because Z".
 
 ## Project layout
 

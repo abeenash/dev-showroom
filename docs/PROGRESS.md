@@ -2,19 +2,23 @@
 
 Claude Code updates this file at the end of every session. Tick a box only when the phase passes `npm run lint` and `npm run build` and has been committed.
 
-## Phases
+## Phases (ship mode: run all of them back to back, committing after each)
 
-- [ ] **0. Scaffold:** create-next-app (TS, Tailwind, App Router, `src/`, ESLint), git init, kit files in place, fonts via `next/font`. *Learn: App Router file conventions, layouts, Server vs Client Components.*
-- [ ] **1. Design system (port):** Lovable `styles.css` → `globals.css`, the theme script, GridOverlay, SectionLabel, PhoneFrame, Header (from the Hero nav), Footer, ThemeToggle. *Learn: next/font vs a Google Fonts link, Tailwind v4 `@theme`/`@utility`, where the client boundary goes.*
-- [ ] **2. Content layer:** typed `src/content/*` built only from `docs/FACTS.md` (keep Lovable's types), with TODO placeholders for anything unconfirmed. Add the real screenshots to `public/shots/`. **TODO(human): Abinash writes the handwritten margin notes.** *Learn: typing data, importing it in Server Components.*
-- [ ] **3. Home page, static (port):** every section from the Lovable files, using next/link, next/image and the Metadata API. No GSAP yet: the page must look complete without JS. *Learn: Server vs Client Components in practice, composition.*
-- [ ] **4. Motion (port):** `lib/gsap.ts`, RevealRoot (`data-reveal`), Hero SplitText (`fonts.ready` + `split-pending`), PinnedStory, Notes horizontal pin. Check that resizing and route changes don't leave ScrollTriggers behind. *Learn: `"use client"`, `useGSAP` scope and cleanup, `matchMedia`, hydration.*
-- [ ] **5. Case studies (port):** `/work/[slug]` from `work.$slug.tsx`, with `generateStaticParams`, `generateMetadata` and `notFound`. Write the copy from FACTS only. *Learn: dynamic routes, static generation, TanStack loader vs Next.js.*
-- [ ] **6. Contact + database:** Neon + Drizzle, a `messages` table, a Server Action with zod validation, honeypot and rate limit. *Learn: Server Actions, env vars, `server-only`, migrations.* (Directly reusable in AMS.)
-- [ ] **7. Admin (small):** password login, signed cookie, `proxy.ts`, a page to read messages and manage videos and logbook entries. Reuse the patterns in `E:\PROJECTS\salina_portfolio\src\lib\session.ts`. *Learn: auth, cookies, proxy, protecting Server Actions.* (Core for AMS web.)
-- [ ] **8. Where I started:** port Mood Journal, Weather Checker and Expense Tracker from JSX to TSX under `/playground/*`. *Learn: client state, hydration-safe localStorage.*
-- [ ] **9. Polish:** Open Graph image (`next/og`), sitemap, robots, accessibility pass, Lighthouse ≥ 95, certificate lightbox, real screenshots and scans.
-- [ ] **10. Ship:** Vercel, env vars, Neon production branch, custom domain, then retire or redirect the old abeenash.vercel.app.
+- [x] **0. Scaffold:** finish the leftovers: the `metadata` object in `layout.tsx` (built from `site`, title template `%s — Abinash Adhikari`), then commit.
+- [ ] **1. Design system (port):** Lovable `styles.css` → `globals.css` (with dark theme), the no-flash theme script, GridOverlay, SectionLabel, PhoneFrame, Header, Footer, ThemeToggle, Clock, OpenToWork.
+- [ ] **2. Content + images:** typed `src/content/*` built only from FACTS (keep Lovable's types). Prepare the images exactly as FACTS → "Screenshots" says: raw files go to `assets-src/`, sharp generates web copies, blur the Fish Station banner and crop the Activate Windows watermarks, and view every output image to confirm. Use the portrait, photos and certificates as FACTS → "Photos" and "Recognition" describe. Anything unconfirmed is left out and listed under MISSING.
+- [ ] **3. Home page (port):** all sections from the Lovable files using next/link, next/image and the Metadata API. It must look complete with JavaScript disabled.
+- [ ] **4. Motion (port):** `lib/gsap.ts`, RevealRoot, Hero SplitText, PinnedStory, Notes horizontal pin, all inside `matchMedia`. Check that resizing and route changes leave no stray ScrollTriggers.
+- [ ] **5. FOS case study:** `/work/[slug]` with `generateStaticParams`, `generateMetadata` and `notFound`. Copy from FACTS only.
+- [ ] **6. Contact + Neon:** Drizzle schema with a `messages` table, a Server Action with zod, a honeypot, `useActionState` and a simple per-IP rate limit. If `DATABASE_URL` is missing, the action must fail gracefully with a calm message (never a crash). Add `.env.example`, `db:generate` and `db:migrate` scripts.
+- [ ] **7. Where I started:** port Abinash's original Mood Journal, Weather Checker and Expense Tracker (`E:\PROJECTS\portfolio-with-react\project-portfolio\src`) from JSX to TSX, shown in Lovable's tile + modal style.
+- [ ] **8. Ship polish:** Open Graph image (`next/og`), favicon, sitemap and robots (`site.url` comes from an env var), accessibility and contrast pass, `next build` clean, Lighthouse check if possible.
+- [ ] **9. Walkthrough:** write `docs/WALKTHROUGH.md` (format in AGENTS.md), plus the MISSING list and deploy steps.
+
+**Later (not today):** an admin page for messages, videos and logbook (useful practice for AMS auth); real certificate scans; video links.
+
+## MISSING (left out of the live site until Abinash provides them)
+<!-- Claude Code fills this in during the build -->
 
 ## Open questions (for Abinash)
 - Custom domain name? Domain email or Gmail?
@@ -29,3 +33,4 @@ Claude Code updates this file at the end of every session. Tick a box only when 
 
 ## Session log
 <!-- newest first: YYYY-MM-DD · phase · what changed · anything touched outside the phase -->
+- 2026-10-20 · 0 · `metadata` export (title template, description, authors from `site`); removed the visible TODO line from the placeholder page; committed the earlier session's fonts/tokens/site.ts leftovers.

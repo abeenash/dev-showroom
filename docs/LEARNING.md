@@ -57,3 +57,12 @@ Entry format:
 - **Your task (TODO(human)):** skipped in ship mode. In `RevealRoot.tsx`, change `y: 28` to `y: 60` and watch how much heavier the page feels; then put it back.
 
 ---
+
+### Phase 5 — Dynamic routes: `[slug]`, `generateStaticParams`, `generateMetadata`, `notFound`
+- **What it is:** A folder named `[slug]` matches any value in that URL segment. `generateStaticParams` tells Next.js which values exist, so each page is pre-built as HTML at build time (`●` SSG in the build output). `dynamicParams = false` makes any other slug a 404. `generateMetadata` builds the `<title>` per page. In Next 16, `params` is a **Promise**, so you `await params`.
+- **Where it lives:** `src/app/work/[slug]/page.tsx:9` (static params), `:14` (dynamicParams), `:17` (metadata), `:24` (`notFound()`), `src/app/not-found.tsx`
+- **Common mistake:** reading `params.slug` without `await` (it was synchronous in Next 14, and Next 16 removed the compatibility shim), or forgetting that `notFound()` throws, so code after it never runs.
+- **AMS bridge:** `/students/[id]` and `/subjects/[code]/attendance` in AMS web are the same pattern, but the data changes daily, so you'd leave `dynamicParams` on (rendered on request) and fetch from Spring Boot inside the page.
+- **Your task (TODO(human)):** skipped in ship mode. Add an `ams` entry to `caseStudies` (FACTS only), set `hasCaseStudy: true` on AMS, and run `npm run build`: a second `●` route appears.
+
+---

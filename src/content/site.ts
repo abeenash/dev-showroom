@@ -12,7 +12,21 @@ export const site = {
   email: "abeenashadheekaree77@gmail.com",
   github: "https://github.com/abeenash",
   linkedin: "https://www.linkedin.com/in/abinash-adhikari-801148303",
+  instagram: "https://www.instagram.com/a_bee_nash/",
+  facebook: "https://www.facebook.com/abinash.adhikari.395",
   cv: "/Abinash_Adhikari_CV.pdf",
   // https://abinasha.com.np in production. Read from the environment (set it in Vercel), never hard-coded.
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+  features: {
+    /** "Little me": the cartoon avatar that walks down the left gutter on desktop (components/avatar). */
+    avatarGuide: true,
+  },
 } as const;
+
+/** The social links shown as icons in Contact (the only place on the site that lists them). */
+export const socials = [
+  { name: "LinkedIn", href: site.linkedin, icon: "linkedin" },
+  { name: "GitHub", href: site.github, icon: "github" },
+  { name: "Instagram", href: site.instagram, icon: "instagram" },
+  { name: "Facebook", href: site.facebook, icon: "facebook" },
+] as const;

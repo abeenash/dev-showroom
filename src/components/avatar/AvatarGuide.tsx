@@ -1,8 +1,9 @@
 "use client";
 
 import { useRef } from "react";
-import { gsap, MQ, ScrollTrigger, useGSAP } from "@/lib/gsap";
+import { gsap, loadMorphSVG, ScrollTrigger, useGSAP } from "@/lib/gsap";
 import { AvatarFace, FACE } from "./AvatarFace";
+import { AVATAR_MQ } from "./config";
 
 type Eyes = "open" | "narrow" | "down" | "closed";
 type Face = {
@@ -49,21 +50,33 @@ const SIZE = 64;
 const SHELL = 1408; // .shell max-width (88rem)
 const PAD = 40; // .shell padding from md up
 
-// Wide desktop + motion only. Below 1536px the free margin beside the content is narrower than the
-// avatar (40–100px), so it would sit on screenshots and text; there it stays docked in the header.
-export const AVATAR_MQ = `${MQ.motion} and (min-width: 1536px)`;
-
+// Loaded (by AvatarGuideLoader) only on wide screens with motion allowed; below that the avatar
+// stays docked in the header. The matchMedia here still guards resizes and setting changes.
 export function AvatarGuide() {
   const ref = useRef<HTMLDivElement>(null);
 
   useGSAP(
     () => {
       const mm = gsap.matchMedia();
-      mm.add(AVATAR_MQ, () => {
+      mm.add(AVATAR_MQ, (context) => {
+        let stopBlink = () => {};
+        let cancelled = false;
+        // Expressions morph with MorphSVG, so set up once it's loaded. context.add: everything
+        // created after the await still belongs to this matchMedia context and gets reverted with it.
+        loadMorphSVG().then(() => {
+          if (!cancelled) context.add(() => (stopBlink = setup()));
+        });
+        return () => {
+          cancelled = true;
+          stopBlink();
+        };
+      });
+
+      function setup() {
         const el = ref.current;
         const dock = document.querySelector<HTMLElement>(".avatar-dock");
         const heading = document.querySelector<HTMLElement>("#contact-h");
-        if (!el || !dock || !heading) return;
+        if (!el || !dock || !heading) return () => {};
         const q = gsap.utils.selector(el);
         const [mouth, browL, browR, eyes, eyesClosed, glint, blush, hand] = [
           ".av-mouth", ".av-brow-l", ".av-brow-r", ".av-eyes", ".av-eyes-closed", ".av-glint", ".av-blush", ".av-hand",
@@ -201,7 +214,8 @@ export function AvatarGuide() {
         });
 
         return () => blinkCall?.kill();
-      });
+      }
+
       return () => mm.revert();
     },
     { scope: ref },

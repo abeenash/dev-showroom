@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import { socials } from "@/content/site";
 import { BLOBS } from "@/lib/blob";
-import { gsap, MQ, ScrollTrigger, useGSAP } from "@/lib/gsap";
+import { gsap, loadMorphSVG, MQ, ScrollTrigger, useGSAP } from "@/lib/gsap";
 import { BRAND_GLYPHS } from "./brand-glyphs";
 
 // Four social icons, each in a soft blob. Layers, so tweens never fight over the same transform:
@@ -18,7 +18,7 @@ export function SocialBlobs() {
   useGSAP(
     () => {
       const mm = gsap.matchMedia();
-      mm.add(MQ.motion, () => {
+      mm.add(MQ.motion, (context) => {
         const list = ref.current;
         if (!list) return;
         const items = gsap.utils.toArray<HTMLElement>(".social-item");
@@ -37,30 +37,41 @@ export function SocialBlobs() {
         const loops: gsap.core.Animation[] = [];
         items.forEach((item, i) => {
           const float = item.querySelector(".social-float");
-          const blob = item.querySelector(".blob-path");
           const d = 2.4 + i * 0.45;
           loops.push(
             gsap.fromTo(float, { y: -6 }, { y: 6, duration: d, ease: "sine.inOut", yoyo: true, repeat: -1, paused: true }),
             gsap.fromTo(float, { rotation: -3 }, { rotation: 3, duration: d * 1.37, ease: "sine.inOut", yoyo: true, repeat: -1, paused: true }),
           );
-          // Morph through the 3 shapes and back: one A → B → C pass takes 6–8s.
-          const leg = (6 + i * 0.6) / 2;
-          const order = [BLOBS[(i + 1) % 3], BLOBS[(i + 2) % 3]];
-          loops.push(
-            gsap
-              .timeline({ repeat: -1, yoyo: true, paused: true })
-              .to(blob, { morphSVG: order[0], duration: leg, ease: "sine.inOut" })
-              .to(blob, { morphSVG: order[1], duration: leg, ease: "sine.inOut" }),
-          );
+        });
+        // Blob morphs need MorphSVG, loaded on demand. context.add: tweens created after the await
+        // still belong to this matchMedia context, so they're reverted with everything else.
+        let cancelled = false;
+        loadMorphSVG().then(() => {
+          if (cancelled) return;
+          context.add(() => {
+            items.forEach((item, i) => {
+              const blob = item.querySelector(".blob-path");
+              // Through the 3 shapes and back: one A → B → C pass takes 6–8s.
+              const leg = (6 + i * 0.6) / 2;
+              const order = [BLOBS[(i + 1) % 3], BLOBS[(i + 2) % 3]];
+              loops.push(
+                gsap
+                  .timeline({ repeat: -1, yoyo: true, paused: true })
+                  .to(blob, { morphSVG: order[0], duration: leg, ease: "sine.inOut" })
+                  .to(blob, { morphSVG: order[1], duration: leg, ease: "sine.inOut" }),
+              );
+            });
+            sync();
+          });
         });
 
         // 3. Only run them while someone can see them: the section is on screen AND the tab is visible.
         //    Saves battery, and moving content stops when it isn't being looked at (WCAG 2.2.2).
         let onScreen = false;
-        const sync = () => {
+        function sync() {
           const run = onScreen && document.visibilityState === "visible";
           loops.forEach((l) => (run ? l.play() : l.pause()));
-        };
+        }
         ScrollTrigger.create({
           trigger: list.closest("section") ?? list,
           start: "top bottom",
@@ -83,7 +94,10 @@ export function SocialBlobs() {
           }
         };
         document.addEventListener("visibilitychange", onVisibility);
-        return () => document.removeEventListener("visibilitychange", onVisibility);
+        return () => {
+          cancelled = true;
+          document.removeEventListener("visibilitychange", onVisibility);
+        };
       });
       return () => mm.revert();
     },

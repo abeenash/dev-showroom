@@ -172,7 +172,88 @@ Same format as above: what I built, what happens at runtime, why this way, try i
 
 ---
 
-## 5. MISSING: left out until you provide it
+## 5. Round 3: inbox notifications, contact links, and "little me"
+
+### F1 — Resend and `after()`: an email after the response
+- **What I built:** `src/lib/notify.ts:20` sends you an email through Resend. Its settings:
+  - **To and from:** to `CONTACT_TO_EMAIL`, from `CONTACT_FROM_EMAIL` or Resend's test sender (`:13`).
+  - **Reply-to:** the visitor (`:47`), so "Reply" just works.
+  - **Body:** a plain-text and an HTML version, with everything the visitor typed escaped (`:17`).
+  - **No key:** it logs once and does nothing (`:23`).
+
+  The contact action calls it with `after(() => notifyNewMessage(parsed.data))` (`src/app/actions/contact.ts:85`), only once the Neon insert has succeeded.
+- **What happens at runtime:**
+  1. The browser posts the form to the Server Action.
+  2. The action validates the input, rate-limits, and inserts into Neon.
+  3. `after(...)` *registers* the email job; it doesn't run it yet.
+  4. The action returns `{ status: "ok" }`, React renders "Thanks, {name}", and the response goes out.
+  5. **Then** the callback runs: Resend's API returns an email ID (logged as `contact: notification email sent <id>`).
+
+  On Vercel, `after()` uses the platform's `waitUntil`, which keeps the serverless function alive until the email call finishes even though the visitor already has the answer. It worked with JavaScript off too: a plain HTML form POST still sent the email.
+- **Why this way:**
+  - **No `await` on the send:** awaiting it inside the action would make every visitor wait on a third-party API, and a Resend outage would turn into a failed form.
+  - **No fire-and-forget:** a bare `notifyNewMessage()` without `await` might simply be killed when the serverless function freezes after responding. `after()` is the supported version of "do this later".
+  - **Neon stays the source of truth:** the email is a notification, so its failure is logged and never shown.
+  - **Lovable/TanStack comparison:** TanStack Start had no equivalent built in; you'd reach for a queue or the platform's `waitUntil` yourself.
+- **Try it yourself:** temporarily add `await new Promise(r => setTimeout(r, 5000))` at the top of `notifyNewMessage`, submit the form, and notice "Thanks" still appears instantly. Then move the call out of `after()` and await it directly: now "Thanks" takes 5 seconds.
+- **AMS bridge:** "a notice was posted → email the section's students", "attendance below threshold → notify the student". Save first, then send in `after()`. A big fan-out (hundreds of emails) belongs in a real queue, but the shape is the same.
+
+### F2 — MorphSVG: blobs that change shape
+- **What I built:**
+  - **Links:** Contact is now the only place with links. The email is on one line, with a copy button (`src/components/ui/CopyEmail.tsx:18`) whose result is announced through an `aria-live` region (`:36`). The footer is just the credit line and "Back to top".
+  - **Icons:** the four socials (`src/content/site.ts:27`) are inline Simple Icons glyphs, each in a blob (`src/components/ui/SocialBlobs.tsx`).
+  - **Blob shapes:** three shapes generated in `src/lib/blob.ts:5`. Seven points around a circle at slightly different distances are joined with smooth Bézier curves, so every shape has the same structure.
+  - **Loading MorphSVG:** the plugin loads on demand (`src/lib/gsap.ts:16`).
+- **What happens at runtime:** a normal tween animates numbers, like `x: 0 → 100`. **MorphSVG** animates a path's `d` attribute, its outline, from one shape into another. It does this by lining up the points of both paths and interpolating each one, so the outline "flows". Three shapes on a `yoyo` timeline go A → B → C → B → A forever, at 6–8s per pass and different for each blob, so they never pulse together. Separate nested elements carry the other motions, so tweens never fight over the same `transform`:
+  - The `li` rises in.
+  - `.social-float` floats.
+  - `.social-hello` bounces.
+  - The icon lifts on hover (CSS).
+- **Why this way:** CSS can't morph between two arbitrary paths smoothly, but MorphSVG can, and it's part of `gsap` (free since 3.13), so there's no new dependency. It's loaded with a dynamic `import()` once the contact animations start, so its ~10 KB isn't part of first load. The blob morphs are created inside `context.add()` after that import (`SocialBlobs.tsx:49`), the same rule as the SplitText fonts lesson: anything created after an `await` must join the context, or it won't be cleaned up.
+- **Try it yourself:** in `src/lib/blob.ts`, change one radius in the second shape from `47` to `30` and watch that blob grow a dent as it morphs. Then give one shape 8 radii instead of 7: MorphSVG still copes, but the morph looks less smooth, because the points no longer line up one-to-one.
+- **AMS bridge:** an attendance ring that morphs from "loading" into the real percentage arc, or an empty-state illustration that breathes. Same plugin, same paused-until-visible rule.
+
+### F2 — The Page Visibility API: pause when nobody's watching
+- **What I built:** in `SocialBlobs.tsx`, every idle loop is created **paused**. One `sync()` (`:71`) plays them only when *both* of these are true:
+  - The contact section is on screen (a ScrollTrigger `onToggle`, `:79`).
+  - `document.visibilityState === "visible"`, which is updated by the `visibilitychange` event (`:96`).
+
+  When you come back to the tab with Contact showing, the icons do one keyframed "hello" bounce (`:92`).
+- **What happens at runtime:** switching tabs or minimising the window fires `visibilitychange`, and `visibilityState` becomes `"hidden"`. We pause everything. Coming back fires it again with `"visible"`: we resume, and if the section is on screen, we bounce.
+- **Why this way:**
+  - **Battery:** the browser already throttles hidden tabs, but pausing explicitly also covers the *visible-but-scrolled-away* case.
+  - **Accessibility:** WCAG 2.2.2 says moving content that lasts more than 5 seconds needs a way to stop. Never moving when off-screen, and nothing at all with reduced motion, keeps it calm.
+  - **Easy to clean up:** the listener is removed in the matchMedia cleanup.
+- **Try it yourself:** open DevTools → Console, run `document.addEventListener("visibilitychange", () => console.log(document.visibilityState))`, then switch tabs and back.
+- **AMS bridge:** refetch the attendance list when a teacher returns to the tab (`visibilitychange` → `visible`), and stop polling while it's hidden. TanStack Query's `refetchOnWindowFocus` is built on exactly this.
+
+### F3 — "Little me": mapping scroll to position and expressions
+- **What I built:**
+  - **The face:** a flat SVG of you (`src/components/avatar/AvatarFace.tsx`): glasses, messy hair and a vermilion tie. Its named parts (`av-mouth`, `av-brow-l`, `av-eyes` …) let GSAP change the expression, and the mouth and brow shapes are data (`FACE`, `:12`).
+  - **The dock:** it sits beside "A. Adhikari" in the header on every page and every screen.
+  - **The walk:** on the home page, `AvatarGuideLoader` (`src/components/avatar/AvatarGuideLoader.tsx:19`) fetches the walking version (`AvatarGuide.tsx`) **only when** the screen is at least 1536px wide and motion is allowed (`next/dynamic`, `:9`).
+  - **The switch:** `site.features.avatarGuide` (`src/content/site.ts:22`) turns the whole thing on or off.
+- **What happens at runtime (wide screen):**
+  1. **Position** is a function of the scroll position (`target()`, `AvatarGuide.tsx:143`), recomputed on every scroll frame:
+     - At the top, it sits exactly on the docked copy, scaled to 40px.
+     - Over the first 240px it slides into the empty margin and grows to 64px.
+     - Its height then follows page progress, `walk = scrollY / landAt` (`:159`), from the top of the screen to a landing line near the bottom. `landAt` is the scroll position where "Have something worth building?" reaches that line (`:156`).
+     - After that it rides along beside the heading (`:161`).
+  2. **Walking pace:** `gsap.quickTo` (`:132`) eases toward each new target over 1s, which gives the slight lag (like `scrub: 1`).
+  3. **Expressions:** 11 "stops" (`:35`) each get a ScrollTrigger from that section's top crossing 55% of the screen to the next one's. `onEnter` / `onEnterBack` call `setFace()` (`:91`), which morphs the mouth and brows with MorphSVG in 0.25s and fades the glint, blush and closed-eye arcs. The wave and the talking mouth are short timelines, and a `delayedCall` blinks every 3–6s.
+  4. **Getting out of the way:** while the Notes or Recognition row is pinned and sliding, its cards pass through the margin, so the avatar fades out until that section has left the screen (`:207`).
+  5. **Pins and order:** pinned sections need no special code. Pins add scroll distance, so page progress simply moves more slowly through them. The guide mounts after hydration, after all the pins exist, so its triggers measure the final layout.
+- **Why this way:**
+  - **Computed position, not a timeline:** a single `y: 0 → 100%` timeline couldn't "start on the dock", "land beside a heading" *and* "ride along with it". A function from scroll position to `{x, y, scale}`, plus `quickTo` for smoothing, can express all three.
+  - **Transforms only:** that means no layout shift (CLS stayed 0).
+  - **1536px, not 1024px (a deviation):** between 1024 and 1535px the free margin is only 40–100px. The 64px avatar would sit on the RMS screenshots, the AMS text and the sliding Notes cards, which breaks your own "never over content" rule. I checked every width with a script that scrolls 61 steps and tests the avatar's box against every text run, image and field.
+  - **No cost for phones:** loading it through `next/dynamic` means phones and laptops never download its code. Measured with the flag on and off, the Lighthouse scores were the same within run-to-run noise.
+- **Try it yourself:** in `AvatarGuide.tsx`, change `{ sel: "#videos", face: "talking" }` to `face: "grin"`, or add a stop for the Vendora row (`#work ol > li:nth-child(3)`). In the browser, `document.querySelector("[data-face]").dataset.face` shows the current expression as you scroll.
+- **AMS bridge:** the same "scroll position → state" mapping drives a progress indicator for a long form (a student's profile setup), and the "load only when the media query matches" loader is how you'd keep a heavy desktop-only chart out of the phone bundle.
+
+---
+
+## 6. MISSING: left out until you provide it
 
 Nothing on the site says "TODO"; these things are simply absent. Add the item and the element comes back.
 
@@ -183,7 +264,7 @@ Nothing on the site says "TODO"; these things are simply absent. Add the item an
 
 ---
 
-## 6. Deploy and domain (abinasha.com.np)
+## 7. Deploy and domain (abinasha.com.np)
 
 1. **Push to GitHub.** Create an empty repo on github.com (no README), then: `git remote add origin https://github.com/abeenash/<repo>.git` and `git push -u origin master`.
 2. **Import on Vercel.** vercel.com → Add New → Project → pick the repo. Framework auto-detects as Next.js; leave the build settings alone.
@@ -191,7 +272,10 @@ Nothing on the site says "TODO"; these things are simply absent. Add the item an
    - `DATABASE_URL`: the same Neon connection string as in your `.env.local`. The `messages` table already exists.
    - `NEXT_PUBLIC_SITE_URL`: `https://abinasha.com.np` (no trailing slash). It's baked in at build time, which is why it must be set first.
    - `OPENWEATHER_API_KEY`: the key from your `.env.local`.
-4. **Deploy**, then open the `*.vercel.app` URL and check `/`, `/work/rms`, the videos, a playground app, and send yourself a test message.
+   - `RESEND_API_KEY`: the key from your `.env.local` (resend.com → API Keys). Without it, messages are still saved; you just get no email.
+   - `CONTACT_TO_EMAIL`: your inbox, the same value as in `.env.local`.
+   - `CONTACT_FROM_EMAIL`: leave it **unset** for now. The code then uses `Portfolio <onboarding@resend.dev>`, Resend's test sender, which can only deliver to the email address your Resend account was created with. So `CONTACT_TO_EMAIL` must be that address until step 9.
+4. **Deploy**, then open the `*.vercel.app` URL and check `/`, `/work/rms`, the videos, a playground app, and send yourself a test message. It should land in your inbox (check spam the first time), and Vercel → your project → Logs shows `contact: notification email sent <id>`.
 5. **Add the domain in Vercel.** Project → Settings → Domains → add `abinasha.com.np`, then add `www.abinasha.com.np` and set it to redirect to `abinasha.com.np`. Vercel will say the domain isn't configured yet. That's expected.
 6. **Point the nameservers at Vercel (register.com.np).** `.com.np` domains are managed at register.com.np, where you can set nameservers but usually not individual records. Log in → your domain → nameserver settings, and replace the current ones with:
    - `ns1.vercel-dns.com`
@@ -200,16 +284,22 @@ Nothing on the site says "TODO"; these things are simply absent. Add the item an
    Save. If the panel asks for a reason or approval, follow it; `.np` changes are sometimes reviewed by hand.
 7. **Wait.** Nameserver changes for `.np` can take **a few hours, sometimes up to 24–48 hours**. Vercel's Domains page turns green when it sees them, and then issues the HTTPS certificate automatically. Nothing on your side needs to change while you wait; the `*.vercel.app` URL keeps working.
    - With Vercel's nameservers, Vercel now runs all DNS for the domain. If you later want email at `@abinasha.com.np`, add its MX records in Vercel → Domains → DNS records.
-8. **Check after launch:** `https://abinasha.com.np/sitemap.xml` and `/robots.txt` show the domain; paste the URL into a social-card preview tool to see the OG image; toggle the theme; read messages in the Neon console → Tables → `messages`.
+8. **Check after launch:** `https://abinasha.com.np/sitemap.xml` and `/robots.txt` show the domain; paste the URL into a social-card preview tool to see the OG image; toggle the theme; send a message and reply to the notification (it should go to the visitor's address); every message is also in the Neon console → Tables → `messages`.
+9. **Later: send from your own domain** (better deliverability, any recipient):
+   1. In resend.com → Domains, add `abinasha.com.np`.
+   2. Resend shows a few DNS records (an MX and a TXT for SPF, a TXT for DKIM, usually on a `send.` subdomain). Your DNS lives at Vercel now (step 6), so add them in Vercel → Domains → `abinasha.com.np` → DNS records.
+   3. Wait until Resend says **Verified**.
+   4. In Vercel, set `CONTACT_FROM_EMAIL` to `Portfolio <hello@abinasha.com.np>` (any name @ your domain works for sending), then **Redeploy**.
 
 **Day-to-day commands:** `npm run dev` · `npm run lint` · `npm run build` · `npm run images` (re-generate web images after adding raw files to `assets-src/`) · `npm run db:generate` then `npm run db:migrate` (after editing `src/db/schema.ts`).
 
 ---
 
-## 7. Things I wasn't sure about
+## 8. Things I wasn't sure about
 
+- **The avatar walks only from 1536px, not 1024px.** Below that there's no empty margin wide enough, and it would cover content (see Round 3, F3). On 1024–1535px screens it stays docked in the header. If you'd rather turn it off entirely, set `site.features.avatarGuide` to `false`.
+- **Lighthouse after Round 3:** desktop 94–96, `/work/rms` 100, mobile 86–90 (Round 2 was 97 / 90–94). The avatar isn't the cause: with its flag off, mobile measured 87–89. The difference comes from the contact section's new client code (the copy button and the animated icons, about +30ms of main-thread time) plus normal run-to-run noise. Accessibility, best practices and SEO stay at 100, and layout shift at 0.
 - **The CV:** you asked for it to be linked, but publishing it would publish three phone numbers, two of them other people's. I chose not to (see MISSING).
-- **`.env.example`:** your editor saved the OpenWeather key into it again after I'd moved it to `.env.local`. The committed `.env.example` has an empty key; I've staged around the local edit ever since. Clear the value there before your next `git add -A`.
 - **Video titles** are exactly as on YouTube, including the lowercase "notes app using react native". If you'd like it capitalised, rename it on YouTube and update `src/content/videos.ts`.
 - **The Vendora row's link labels** ("Vendora explained", "Containerizing Vendora with Docker") are your descriptions from chat, not the YouTube titles.
 - **AMS on the home page** now shows "attendance history" and "Attendance submitted" (the two screens with your notes). The offline-banner screenshot is no longer on the home page.

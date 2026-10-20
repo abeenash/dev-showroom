@@ -55,7 +55,8 @@ export function ThemeToggle() {
     <button
       type="button"
       onClick={flip}
-      className="label link-draw hover:text-foreground"
+      // Hidden without JavaScript, where it couldn't do anything (CSS still follows the system theme).
+      className="label link-draw hidden hover:text-foreground js:inline"
       aria-label="Toggle colour theme"
     >
       {theme === null ? "Theme" : theme === "dark" ? "Light" : "Dark"}

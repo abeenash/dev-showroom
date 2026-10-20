@@ -39,3 +39,12 @@ Entry format:
 - **Your task (TODO(human)):** skipped in ship mode. Add your CV to `public/` and wire the hero link.
 
 ---
+
+### Phase 3 — Client islands inside a Server Component page
+- **What it is:** `app/page.tsx` is a Server Component, built to static HTML (`○ /` in the build output). Interactive parts are small **client islands** (separate client components dropped into server-rendered HTML): `PinnedStory` (state), `Lightbox` (a `<dialog>`), `Clock`, `ThemeToggle`. A Server Component can render a client component and pass it plain props; the reverse (importing server-only code into a client file) isn't allowed. TanStack's `createFileRoute` + `head()` became a default export + `export const metadata`.
+- **Where it lives:** `src/app/page.tsx:22`, `src/components/sections/Recognition.tsx:35` (server list → client `Lightbox`), `src/components/ui/Lightbox.tsx:23` (a real `<a href>` that JS upgrades)
+- **Common mistake:** building class names with template strings (`` `${prefix}:flex` ``). Tailwind reads your source as text and never sees the final name, so the style silently never ships. Write class names out in full.
+- **AMS bridge:** the AMS notices page can be a Server Component that fetches notices from Spring Boot on the server; only the "mark as read" button or the subject filter needs `"use client"`.
+- **Your task (TODO(human)):** skipped in ship mode. Turn off JavaScript in DevTools and scroll the home page: everything should still read.
+
+---

@@ -1,25 +1,40 @@
+import type { Metadata } from "next";
 import { site } from "@/content/site";
-import { Clock } from "@/components/ui/Clock";
-import { OpenToWork } from "@/components/ui/OpenToWork";
-import { MarginLabel } from "@/components/ui/MarginLabel";
+import { videos } from "@/content/videos";
+import { About } from "@/components/sections/About";
+import { Contact } from "@/components/sections/Contact";
+import { Hero } from "@/components/sections/Hero";
+import { Notes } from "@/components/sections/Notes";
+import { PinnedStory } from "@/components/sections/PinnedStory";
+import { Recognition } from "@/components/sections/Recognition";
+import { Videos } from "@/components/sections/Videos";
+import { Work } from "@/components/sections/Work";
 
-// Phase 1 placeholder: proves the design system. Replaced by real sections in phase 3.
+// `absolute` skips the layout's "%s — Abinash Adhikari" template for the home page.
+export const metadata: Metadata = {
+  title: { absolute: `${site.name} — ${site.role}` },
+  description: "Mobile apps and the backends behind them, from Lalitpur, Nepal.",
+};
+
+// A Server Component: rendered to HTML at build time (static), no JavaScript of its own.
+// Interactive pieces (PinnedStory, Lightbox, Clock, ThemeToggle) are small client islands inside it.
 export default function Home() {
+  // Section numbers ("01 — WORK") follow the order below, so hidden sections never leave gaps.
+  let count = 0;
+  const n = () => String(++count).padStart(2, "0");
+
   return (
-    <main className="shell py-24">
-      <div className="page-grid">
-        <MarginLabel n="00">Hello</MarginLabel>
-        <div className="col-span-4 md:col-span-10">
-          <h1 className="display">{site.name}</h1>
-          <p className="mt-6 text-2xl tracking-tight md:text-4xl">
-            Mobile & Full-Stack <span className="accent-word">Developer</span>
-          </p>
-          <div className="mt-10 flex flex-col gap-2">
-            <OpenToWork />
-            <Clock />
-          </div>
-        </div>
-      </div>
-    </main>
+    <>
+      <Hero />
+      <main>
+        <Work n={n()} />
+        <PinnedStory n={n()} />
+        {videos.length > 0 && <Videos n={n()} />}
+        <Notes n={n()} />
+        <About n={n()} />
+        <Recognition n={n()} />
+        <Contact n={n()} />
+      </main>
+    </>
   );
 }

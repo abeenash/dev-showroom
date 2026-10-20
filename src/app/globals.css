@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* `js:` applies only once the inline script in layout.tsx has added `js` to <html>.
+   Used for progressive enhancement: the page is complete without JavaScript. */
+@custom-variant js (&:where(html.js, html.js *));
+
 /* Design system, ported from the Lovable draft (styles.css).
    Fonts come from next/font (src/lib/fonts.ts) as CSS variables. */
 

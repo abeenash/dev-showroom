@@ -214,6 +214,72 @@
   }
 }
 
+/* Theme toggle icons: a moon in light theme (go dark), a sun in dark theme (go light).
+   Driven by the same selectors as the colour tokens, so the right icon shows from the first paint. */
+.theme-icon-moon,
+.theme-icon-sun {
+  transition:
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.3s ease;
+}
+.theme-icon-sun {
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.5);
+}
+:root[data-theme="dark"] .theme-icon-sun {
+  opacity: 1;
+  transform: none;
+}
+:root[data-theme="dark"] .theme-icon-moon {
+  opacity: 0;
+  transform: rotate(90deg) scale(0.5);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .theme-icon-sun {
+    opacity: 1;
+    transform: none;
+  }
+  :root:not([data-theme="light"]) .theme-icon-moon {
+    opacity: 0;
+    transform: rotate(90deg) scale(0.5);
+  }
+}
+
+/* "Spreading" theme switch (View Transitions API; ThemeToggle adds .theme-reveal for its duration).
+   The browser freezes the old page as an image (::view-transition-old) and shows the live new page
+   (::view-transition-new) above it. We turn off the default crossfade and instead reveal the new
+   page through a circle that grows from the toggle (--theme-x/y) to the farthest corner (--theme-radius). */
+.theme-toggle {
+  view-transition-name: theme-toggle; /* captured separately, so it stays crisp above the reveal */
+}
+.theme-reveal::view-transition-old(root),
+.theme-reveal::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+.theme-reveal::view-transition-old(root) {
+  z-index: 1;
+}
+.theme-reveal::view-transition-new(root) {
+  z-index: 2;
+  animation: theme-spread 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+/* The toggle itself: skip its crossfade and show the live button (its icon swap animates in place). */
+.theme-reveal::view-transition-old(theme-toggle) {
+  display: none;
+}
+.theme-reveal::view-transition-new(theme-toggle) {
+  animation: none;
+}
+@keyframes theme-spread {
+  from {
+    clip-path: circle(0 at var(--theme-x) var(--theme-y));
+  }
+  to {
+    clip-path: circle(var(--theme-radius) at var(--theme-x) var(--theme-y));
+  }
+}
+
 /* Hide split targets until GSAP takes over (only when JS + motion are on).
    Without JS the `js` class is never added, so headings are always visible. */
 /* Tablet/desktop only: on phones the name shows at once (better LCP on slow networks). */
@@ -238,5 +304,15 @@
   }
   .link-draw::after {
     transition: none;
+  }
+  .theme-icon-moon,
+  .theme-icon-sun {
+    transition: none;
+  }
+  /* ThemeToggle already skips the view transition here; this is a second guard. */
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
   }
 }

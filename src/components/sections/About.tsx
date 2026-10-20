@@ -43,7 +43,7 @@ export function About({ n }: { n: string }) {
               className="h-auto w-full"
             />
             <figcaption className="mt-2 font-mono text-xs text-muted-foreground">
-              Hosting an event at Orchid International College
+              {about.hostingCaption}
             </figcaption>
           </figure>
         </div>

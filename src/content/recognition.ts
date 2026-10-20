@@ -1,4 +1,5 @@
 // Source: docs/FACTS.md → Recognition (verified from certificates). Years are AD conversions of BS dates.
+// Group captions are Abinash's own words.
 import bizbuzzCert from "../../public/certs/bizbuzz-2026.jpg";
 import growthForumCert from "../../public/certs/growth-forum-nepal.jpg";
 import iccrCert from "../../public/certs/iccr-2026.jpg";
@@ -17,6 +18,7 @@ import type { AwardGroup } from "./types";
 export const recognition: AwardGroup[] = [
   {
     name: "Academics",
+    caption: "Being a developer takes consistency and discipline.",
     awards: [
       {
         year: "2023",
@@ -50,6 +52,7 @@ export const recognition: AwardGroup[] = [
   },
   {
     name: "Competitions",
+    caption: "Being a developer means stepping into business too.",
     awards: [
       {
         year: "2026",
@@ -64,7 +67,6 @@ export const recognition: AwardGroup[] = [
   },
   {
     name: "Research",
-    // Abinash's own words (FACTS → Recognition).
     caption: "Being a developer takes research too.",
     awards: [
       {

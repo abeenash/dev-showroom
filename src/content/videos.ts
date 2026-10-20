@@ -1,5 +1,19 @@
-// Walkthrough videos. FACTS has no confirmed links yet, so the list is empty and the
-// Videos section (and the hero's "Videos" link) stay hidden until it isn't.
+// Source: docs/FACTS.md → Videos. Titles are the real YouTube titles (fetched from YouTube's
+// oEmbed endpoint), never invented. No durations: they aren't verified.
 import type { Video } from "./types";
 
-export const videos: Video[] = [];
+/** "I explain what I build": the main row. */
+export const videos: Video[] = [
+  { id: "XYmZBwiqwzk", title: "Sales and Inventory Management System: Vendora" },
+  { id: "Wd_6ydrR-SA", title: "Containerizing Vendora" },
+  { id: "dcIrrSUoCYg", title: "notes app using react native" },
+];
+
+/** The smaller second row. The caption is Abinash's own words. */
+export const securityLabs = {
+  caption: "Run on my own lab setup, to understand how attacks work so I can build against them.",
+  videos: [
+    { id: "Qa546IzzZFw", title: "Password Cracking Lab Demonstration" },
+    { id: "KLdD1l98RCs", title: "SQL Injection Lab Demonstration (IT Ethics and Cybersecurity)" },
+  ] satisfies Video[],
+};

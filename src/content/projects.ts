@@ -49,6 +49,10 @@ export const screens = {
   },
 } satisfies Record<string, Shot>;
 
+/** Why RMS exists, in Abinash's words. Also opens the case study ("The problem"). */
+export const rmsProblem =
+  "Waiters need a way to manage each table's orders and tell the kitchen right away. They can't always be at a desktop, but they always have a phone in hand. That's where RMS comes in.";
+
 export const projects: Project[] = [
   {
     slug: "rms",
@@ -56,13 +60,12 @@ export const projects: Project[] = [
     kind: "Restaurant Management System",
     status: "Shipped",
     period: "Jul – Oct 2026 · built during an internship",
-    summary:
-      "Staff log in, pick a table, take an order from the menu, see live order alerts, run QR promos and payments, and print the invoice. Shipped as a signed APK and a production app bundle.",
+    summary: `${rmsProblem} Shipped as a signed APK and a production app bundle.`,
     highlight:
       "A pre-release code review turned up 12 fixes: startup tenant lockout, 401 handling, session restore, duplicate login submission, a null-user crash and the Android release config.",
     stack: ["React Native", "Expo", "TypeScript", "TanStack Query", "STOMP over WebSocket", "EAS Build", "Jest"],
     device: "phone",
-    shots: [screens.rmsTables, screens.rmsOrder],
+    shots: [screens.rmsTables, { ...screens.rmsOrder, note: "the totals had to match the POS to the rupee" }],
     hasCaseStudy: true,
   },
   {
@@ -75,7 +78,10 @@ export const projects: Project[] = [
     highlight: "Offline banner, skeleton loaders, a slow-network notice, and real empty and error states.",
     stack: ["Spring Boot", "Java", "Docker Compose", "Expo", "React Native", "NativeWind", "TanStack Query"],
     device: "phone",
-    shots: [screens.amsHistory, screens.amsOffline],
+    shots: [
+      { ...screens.amsHistory, note: "students see their daily attendance at a glance" },
+      { ...screens.amsSubmitted, note: "teachers get the attendance overview" },
+    ],
   },
   {
     slug: "vendora",
@@ -88,6 +94,10 @@ export const projects: Project[] = [
     stack: ["Laravel", "React", "Inertia.js", "Docker"],
     device: "browser",
     shots: [screens.vendoraAdmin, screens.vendoraSales],
+    videos: [
+      { id: "XYmZBwiqwzk", label: "Vendora explained" },
+      { id: "Wd_6ydrR-SA", label: "Containerizing Vendora with Docker" },
+    ],
   },
   {
     slug: "bibhid",

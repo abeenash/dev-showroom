@@ -3,6 +3,7 @@ import Link from "next/link";
 import { projects, smaller } from "@/content/projects";
 import type { Project, ProjectStatus } from "@/content/types";
 import { AccentHeading } from "@/components/ui/AccentHeading";
+import { HandNote } from "@/components/ui/HandNote";
 import { PhoneFrame } from "@/components/ui/PhoneFrame";
 
 const statusLabel: Record<ProjectStatus, string> = {
@@ -19,6 +20,14 @@ function Screens({ p }: { p: Project }) {
         {p.shots.map((s, k) => (
           <figure key={k} className={`w-[44%] max-w-[15rem] ${k === 1 ? "mt-14" : ""}`}>
             <PhoneFrame shot={s} sizes="(min-width: 768px) 15rem, 44vw" />
+            {s.note && (
+              <figcaption>
+                <HandNote className="mt-4">
+                  <span aria-hidden>↑ </span>
+                  {s.note}
+                </HandNote>
+              </figcaption>
+            )}
           </figure>
         ))}
       </div>
@@ -69,6 +78,18 @@ export function Work({ n }: { n: string }) {
                   <p className="mt-6 max-w-md border-l-2 border-accent pl-4 leading-relaxed">{p.highlight}</p>
                 )}
                 <p className="mt-6 font-mono text-xs leading-6 text-muted-foreground">{p.stack.join(" / ")}</p>
+                {p.videos && (
+                  <ul className="mt-4 space-y-1 font-mono text-sm">
+                    {p.videos.map((v) => (
+                      <li key={v.id}>
+                        {/* Jumps to the lite embed in the Videos section, so the visitor stays on the page. */}
+                        <a href={`#video-${v.id}`} className="link-draw text-accent-text">
+                          ▶ {v.label}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                )}
                 <div className="mt-6 flex flex-wrap items-center gap-6">
                   <span className="label">{statusLabel[p.status]}</span>
                   {p.hasCaseStudy && (

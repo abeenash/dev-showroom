@@ -1,7 +1,7 @@
 // Case-study copy. Every sentence traces to docs/FACTS.md (RMS section + logbooks #5–#10).
-// Not here on purpose: the restaurant's backstory ("The problem") and plans ("What I'd do next"),
-// because FACTS doesn't have them yet (PROGRESS → MISSING). The company is never named.
-import { screens } from "./projects";
+// "The problem" is Abinash's own words. Not here on purpose: plans ("What I'd do next"),
+// because FACTS doesn't have them. The company is never named.
+import { rmsProblem, screens } from "./projects";
 import type { Shot } from "./types";
 
 export type CaseSection = { heading: string; paragraphs?: string[]; list?: string[] };
@@ -31,6 +31,7 @@ export const caseStudies: CaseStudy[] = [
       ["Builds", "Signed APK + production app bundle (EAS)"],
     ],
     sections: [
+      { heading: "The problem", paragraphs: [rmsProblem] },
       {
         heading: "What it does",
         list: [

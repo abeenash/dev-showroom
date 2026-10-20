@@ -4,7 +4,12 @@ import type { StaticImageData } from "next/image";
 // Every value that uses them lives in src/content/* and traces back to docs/FACTS.md.
 
 /** A screenshot or photo. Static imports give next/image the size and a blur placeholder for free. */
-export type Shot = { src: StaticImageData; alt: string };
+export type Shot = {
+  src: StaticImageData;
+  alt: string;
+  /** Handwritten (Caveat) note under the screen in a Work row. Only Abinash's approved words. */
+  note?: string;
+};
 
 export type ProjectStatus = "Shipped" | "In progress" | "Built" | "Mockup";
 
@@ -22,6 +27,8 @@ export type Project = {
   device: "phone" | "browser";
   shots: Shot[];
   hasCaseStudy?: boolean;
+  /** Links to videos in the Videos section (by YouTube id), labelled in Abinash's words. */
+  videos?: { id: string; label: string }[];
 };
 
 /** One step of the pinned RMS story. `overlay` is an HTML state drawn on top of the screenshot. */
@@ -33,7 +40,8 @@ export type PinStep = {
   overlay?: "alert" | "offline";
 };
 
-export type Video = { id: string; title: string; caption: string; length?: string };
+/** A YouTube video. `title` is the real YouTube title. */
+export type Video = { id: string; title: string };
 
 export type Note = { n: number; date: string; text: string };
 

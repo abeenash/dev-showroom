@@ -9,7 +9,8 @@ export const about = {
     "Next I'm building the web side of AMS, the academic management system I'm building on my own, in Next.js. This site is where I learned it. I live in Nakkhu, Lalitpur.",
   ],
   portrait: { src: portrait, alt: "Abinash Adhikari in a dark suit and red tie, on stage" } satisfies Shot,
-  hosting: { src: hosting, alt: "Abinash hosting an event at Orchid International College, holding a microphone" } satisfies Shot,
+  hosting: { src: hosting, alt: "Abinash on stage with a microphone, hosting Orchid Dashain Utsav 2083" } satisfies Shot,
+  hostingCaption: "Hosting Orchid Dashain Utsav 2083",
 };
 
 // "What I've shipped with": only tools named in FACTS (plus Next.js and Postgres, which run this site).

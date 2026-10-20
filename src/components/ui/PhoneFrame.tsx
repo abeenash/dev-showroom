@@ -1,7 +1,6 @@
-import Image, { type StaticImageData } from "next/image";
+import Image from "next/image";
 import type { ReactNode } from "react";
-
-export type Shot = { src: StaticImageData; alt: string };
+import type { Shot } from "@/content/types";
 
 type Props = {
   shot?: Shot;

@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# claude code personal settings
+.claude/settings.local.json
+
+# raw, unoptimised originals (web copies are generated into public/ by scripts/prepare-images.mjs)
+/assets-src/

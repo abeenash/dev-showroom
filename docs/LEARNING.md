@@ -30,3 +30,12 @@ Entry format:
 - **Your task (TODO(human)):** skipped in ship mode. Read `Clock.tsx` and explain to yourself why `useSyncExternalStore` beats `useState` + `useEffect` here.
 
 ---
+
+### Phase 2 — Static image imports and typed content
+- **What it is:** `import fosOrder from "../../public/shots/fos/order.jpg"` gives you an object with the file's URL, width, height and a tiny blurred preview, all worked out at build time. Pass it to `next/image` and you get correct sizing (no layout shift), responsive `srcset`, modern formats and `placeholder="blur"` for free. Content lives in typed `.ts` files, so a typo in a project's `status` is a compile error, not a broken page.
+- **Where it lives:** `src/content/projects.ts:2` (imports), `src/content/types.ts:7` (`Shot`), `src/components/ui/PhoneFrame.tsx:20` (`next/image` with `fill` + `sizes`), `scripts/prepare-images.mjs` (shrinking and blurring originals)
+- **Common mistake:** using a string path like `src="/shots/a.jpg"` and forgetting `width`/`height` (Next errors), or serving 5 MB originals and trusting `next/image` to fix it. It resizes on request, but the original still has to be read, and it never removes a phone number in the pixels.
+- **AMS bridge:** AMS web's static content (role names, nav items, notice categories) goes in typed `src/content/*.ts` files, while things that change (attendance, marks) come from the Spring Boot API.
+- **Your task (TODO(human)):** skipped in ship mode. Add your CV to `public/` and wire the hero link.
+
+---

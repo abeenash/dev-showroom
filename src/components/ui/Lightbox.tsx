@@ -4,24 +4,32 @@ import Image from "next/image";
 import { useRef, useState, type ReactNode } from "react";
 import type { Shot } from "@/content/types";
 
-type Props = { title: string; images: Shot[]; className?: string; children: ReactNode };
+type Props = {
+  title: string;
+  images: Shot[];
+  /** Which image opens first (the one that was clicked). */
+  start?: number;
+  className?: string;
+  children: ReactNode;
+};
 
-// The trigger is a real link to the first image, so it still works without JavaScript.
+// The trigger is a real link to the image, so it still works without JavaScript.
 // With JavaScript it opens a native <dialog>: focus trapping, Esc-to-close and the
-// backdrop come from the browser, not from a UI kit.
-export function Lightbox({ title, images, className = "", children }: Props) {
+// backdrop come from the browser, not from a UI kit. It's a zoom: the image is
+// always visible on the page too, never only in here.
+export function Lightbox({ title, images, start = 0, className = "", children }: Props) {
   const dialog = useRef<HTMLDialogElement>(null);
-  const [i, setI] = useState(0);
+  const [i, setI] = useState(start);
   const shot = images[i];
 
   return (
     <>
       <a
-        href={images[0].src.src}
+        href={images[start].src.src}
         className={className}
         onClick={(e) => {
           e.preventDefault();
-          setI(0);
+          setI(start);
           dialog.current?.showModal();
         }}
       >

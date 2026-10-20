@@ -8,7 +8,7 @@ import { HorizontalPin } from "@/components/motion/HorizontalPin";
 export function Notes({ n }: { n: string }) {
   return (
     <section id="notes" aria-labelledby="notes-h" className="overflow-hidden">
-      <HorizontalPin>
+      <HorizontalPin pin=".notes-pin" track=".notes-track">
       <div className="notes-pin flex flex-col justify-center py-20 lg:motion-safe:js:min-h-screen lg:motion-safe:js:py-0">
         <div className="shell">
           <AccentHeading n={n} label="Notes" id="notes-h" before="Notes from the" accent="work" />

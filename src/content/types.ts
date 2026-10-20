@@ -9,6 +9,8 @@ export type Shot = {
   alt: string;
   /** Handwritten (Caveat) note under the screen in a Work row. Only Abinash's approved words. */
   note?: string;
+  /** Short mono caption under an image card (Recognition). */
+  caption?: string;
 };
 
 export type ProjectStatus = "Shipped" | "In progress" | "Built" | "Mockup";

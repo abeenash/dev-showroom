@@ -18,7 +18,8 @@ export const site = {
   // https://abinasha.com.np in production. Read from the environment (set it in Vercel), never hard-coded.
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
   features: {
-    /** "Little me": the cartoon avatar that walks down the left gutter on desktop (components/avatar). */
+    /** "Little me": the cartoon avatar that walks down the margin on wide screens and rides in the
+     *  bottom-left corner on narrower ones (components/avatar). */
     avatarGuide: true,
   },
 } as const;

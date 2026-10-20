@@ -248,6 +248,13 @@ Same format as above: what I built, what happens at runtime, why this way, try i
   - **Transforms only:** that means no layout shift (CLS stayed 0).
   - **1536px, not 1024px (a deviation):** between 1024 and 1535px the free margin is only 40–100px. The 64px avatar would sit on the RMS screenshots, the AMS text and the sliding Notes cards, which breaks your own "never over content" rule. I checked every width with a script that scrolls 61 steps and tests the avatar's box against every text run, image and field.
   - **No cost for phones:** loading it through `next/dynamic` means phones and laptops never download its code. Measured with the flag on and off, the Lighthouse scores were the same within run-to-run noise.
+- **After launch: two fixes.**
+  - **Chromium bug:** `gsap.quickTo(el, "scale")` failed in Chromium, because `scale` is a shorthand GSAP splits into `scaleX` and `scaleY`, so quickTo can't retarget it. In Chrome and Brave the avatar stayed at its docked size, and a warning was printed on every frame. Now there's one quickTo per property, plus a walking sway (the `.av-walk` wrapper) while you scroll.
+  - **Corner mode:** most visitors are on phones, laptops or split screens, where the walk never happens. So `AvatarGuideLoader` now picks one of two modes from two media queries (`src/components/avatar/config.ts`):
+    - **"walk"** from 1536px, as described above.
+    - **"corner"** below that. A 44px avatar (40px on phones) appears in the bottom-left corner once the header has scrolled away, with the same faces, blink and sway, plus a little hop on each new section. It steps aside wherever it would cover the contact form, the buttons, the links at the bottom or a sliding row.
+
+    The corner version's code is fetched on the **first scroll**, so it costs nothing on first load: Lighthouse fetched the same 11 scripts as before. Snapping a window between full and half screen swaps the modes, because the loader gives each mode its own `key`, so React mounts a fresh guide and the old one's GSAP context is reverted.
 - **Try it yourself:** in `AvatarGuide.tsx`, change `{ sel: "#videos", face: "talking" }` to `face: "grin"`, or add a stop for the Vendora row (`#work ol > li:nth-child(3)`). In the browser, `document.querySelector("[data-face]").dataset.face` shows the current expression as you scroll.
 - **AMS bridge:** the same "scroll position → state" mapping drives a progress indicator for a long form (a student's profile setup), and the "load only when the media query matches" loader is how you'd keep a heavy desktop-only chart out of the phone bundle.
 
@@ -297,7 +304,7 @@ Nothing on the site says "TODO"; these things are simply absent. Add the item an
 
 ## 8. Things I wasn't sure about
 
-- **The avatar walks only from 1536px, not 1024px.** Below that there's no empty margin wide enough, and it would cover content (see Round 3, F3). On 1024–1535px screens it stays docked in the header. If you'd rather turn it off entirely, set `site.features.avatarGuide` to `false`.
+- **The avatar walks only from 1536px.** Below that there's no empty margin wide enough. Since the post-launch update, narrower screens (laptops, split screen, phones) get the **corner companion** instead (see Round 3, F3). In the corner it sometimes sits over a line of text as you scroll past. You chose that trade-off, and it still steps aside for the contact form, the buttons, the links at the bottom and the sliding rows. To turn the avatar off entirely, set `site.features.avatarGuide` to `false`.
 - **Lighthouse after Round 3:** desktop 94–96, `/work/rms` 100, mobile 86–90 (Round 2 was 97 / 90–94). The avatar isn't the cause: with its flag off, mobile measured 87–89. The difference comes from the contact section's new client code (the copy button and the animated icons, about +30ms of main-thread time) plus normal run-to-run noise. Accessibility, best practices and SEO stay at 100, and layout shift at 0.
 - **The CV:** you asked for it to be linked, but publishing it would publish three phone numbers, two of them other people's. I chose not to (see MISSING).
 - **Video titles** are exactly as on YouTube, including the lowercase "notes app using react native". If you'd like it capitalised, rename it on YouTube and update `src/content/videos.ts`.

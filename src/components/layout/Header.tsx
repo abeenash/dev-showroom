@@ -14,7 +14,7 @@ export function Header() {
     <header className="shell relative z-10 pt-6">
       <nav aria-label="Primary" className="page-grid items-baseline border-b pb-4">
         <Link href="/" className="label col-span-2 flex items-center gap-3 text-foreground md:col-span-3">
-          {/* "Little me", docked. On wide desktop screens the home page's AvatarGuide takes it for a walk. */}
+          {/* "Little me", docked. On the home page AvatarGuide takes it for a walk (wide screens) or into the corner. */}
           {site.features.avatarGuide && <AvatarFace className="avatar-dock -my-3 size-10 shrink-0" />}
           {site.shortName}
         </Link>

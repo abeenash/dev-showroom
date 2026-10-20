@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import { gsap, loadMorphSVG, ScrollTrigger, useGSAP } from "@/lib/gsap";
 import { AvatarFace, FACE } from "./AvatarFace";
-import { AVATAR_MQ } from "./config";
+import { CORNER_MQ, WALK_MQ, type AvatarMode } from "./config";
 
 type Eyes = "open" | "narrow" | "down" | "closed";
 type Face = {
@@ -50,25 +50,27 @@ const SIZE = 64;
 const SHELL = 1408; // .shell max-width (88rem)
 const PAD = 40; // .shell padding from md up
 
-// Loaded (by AvatarGuideLoader) only on wide screens with motion allowed; below that the avatar
-// stays docked in the header. The matchMedia here still guards resizes and setting changes.
-export function AvatarGuide() {
+// Two ways to keep you company (AvatarGuideLoader picks one; both need motion allowed):
+// - "walk" (≥1536px): starts on the docked copy and walks down the empty margin with page progress.
+// - "corner" (narrower screens): hops into the bottom-left corner once the header has scrolled away.
+// Both change expression per section, blink, and sway while you scroll.
+export function AvatarGuide({ mode }: { mode: AvatarMode }) {
   const ref = useRef<HTMLDivElement>(null);
 
   useGSAP(
     () => {
       const mm = gsap.matchMedia();
-      mm.add(AVATAR_MQ, (context) => {
-        let stopBlink = () => {};
+      mm.add(mode === "walk" ? WALK_MQ : CORNER_MQ, (context) => {
+        let cleanup = () => {};
         let cancelled = false;
         // Expressions morph with MorphSVG, so set up once it's loaded. context.add: everything
         // created after the await still belongs to this matchMedia context and gets reverted with it.
         loadMorphSVG().then(() => {
-          if (!cancelled) context.add(() => (stopBlink = setup()));
+          if (!cancelled) context.add(() => (cleanup = setup()));
         });
         return () => {
           cancelled = true;
-          stopBlink();
+          cleanup();
         };
       });
 
@@ -78,12 +80,10 @@ export function AvatarGuide() {
         const heading = document.querySelector<HTMLElement>("#contact-h");
         if (!el || !dock || !heading) return () => {};
         const q = gsap.utils.selector(el);
-        const [mouth, browL, browR, eyes, eyesClosed, glint, blush, hand] = [
+        const [mouth, browL, browR, eyes, eyesClosed, glint, blush, hand, nudge, walker] = [
           ".av-mouth", ".av-brow-l", ".av-brow-r", ".av-eyes", ".av-eyes-closed", ".av-glint", ".av-blush", ".av-hand",
+          ".av-nudge", ".av-walk",
         ].map((s) => q(s)[0]);
-
-        // The docked copy hides while this one is out walking (matchMedia restores it on revert).
-        gsap.set(dock, { autoAlpha: 0 });
 
         // ---- Expressions ----------------------------------------------------------------------
         let current: keyof typeof FACES | null = null;
@@ -126,55 +126,9 @@ export function AvatarGuide() {
         };
         blinkCall = gsap.delayedCall(gsap.utils.random(3, 6), blink);
 
-        // ---- The walk ---------------------------------------------------------------------------
-        // quickTo = a reusable tween that eases toward each new target: the "walking pace" lag
-        // (like scrub: 1, but for a position we compute ourselves every scroll frame).
-        // One property per quickTo: "scale" is a shorthand GSAP splits into scaleX + scaleY, so a
-        // quickTo on it can't be retargeted (Chromium then left it stuck at the docked size).
-        const xTo = gsap.quickTo(el, "x", { duration: 1, ease: "power3" });
-        const yTo = gsap.quickTo(el, "y", { duration: 1, ease: "power3" });
-        const sxTo = gsap.quickTo(el, "scaleX", { duration: 1, ease: "power3" });
-        const syTo = gsap.quickTo(el, "scaleY", { duration: 1, ease: "power3" });
-        const clamp01 = gsap.utils.clamp(0, 1);
-
-        // Scroll position → where the avatar should be:
-        // 1. At the top it sits exactly on the docked copy (scaled down to its 40px).
-        // 2. Over the first 240px it detaches: slides into the free margin and grows to 64px.
-        // 3. Its height follows page progress, from the top of the screen down to a "landing line"
-        //    near the bottom, reached when the contact heading arrives at that line.
-        // 4. After that it stays beside "Have something worth building?" and scrolls up with it.
-        const target = (snap = false) => {
-          const vw = document.documentElement.clientWidth;
-          const vh = window.innerHeight;
-          const sy = window.scrollY;
-          const d = dock.getBoundingClientRect();
-          const dockScale = d.width / SIZE;
-          const dockX = d.left + d.width / 2 - SIZE / 2;
-          const dockY = d.top + sy + d.height / 2 - SIZE / 2; // in page coordinates (the header scrolls)
-          const contentLeft = Math.max(0, (vw - SHELL) / 2) + PAD;
-          const gutterX = contentLeft - SIZE - 24;
-          const landY = vh - SIZE - 48;
-          const h = heading.getBoundingClientRect();
-          const headingY = h.top + Math.min(h.height, 140) / 2 - SIZE / 2; // beside its first line
-          const landAt = Math.max(1, sy + headingY - landY); // scroll position where they meet
-
-          const detach = clamp01(sy / 240);
-          const walk = clamp01(sy / landAt);
-          const x = dockX + (gutterX - dockX) * detach;
-          const y = sy <= landAt ? dockY + (landY - dockY) * walk : Math.max(16, headingY);
-          const s = dockScale + (1 - dockScale) * detach;
-          if (snap) gsap.set(el, { x, y, scaleX: s, scaleY: s });
-          else {
-            xTo(x);
-            yTo(y);
-            sxTo(s);
-            syTo(s);
-          }
-        };
-
-        // Walking: while you scroll it sways side to side with a small bounce, and settles when you
-        // stop. Its own wrapper (.av-walk), so it never fights the position or the nudge.
-        const walker = q(".av-walk")[0];
+        // ---- Walking sway ---------------------------------------------------------------------
+        // While you scroll it sways side to side with a small bounce, and settles when you stop.
+        // Its own wrapper (.av-walk), so it never fights the position or the nudge.
         const bob = gsap
           .timeline({ paused: true, repeat: -1, defaults: { duration: 0.17, ease: "sine.inOut" } })
           .to(walker, { rotation: 7, y: -3 })
@@ -196,23 +150,21 @@ export function AvatarGuide() {
             gsap.to(walker, { rotation: 0, y: 0, duration: 0.25, ease: "power2.out" });
           });
         };
-
-        gsap.set(el, { transformOrigin: "50% 50%" });
         gsap.set(walker, { transformOrigin: "50% 90%" });
-        target(true);
-        gsap.to(el, { autoAlpha: 1, duration: 0.2 });
+
+        // ---- Position: one of the two modes -----------------------------------------------------
+        const place = mode === "walk" ? walkMode(el, dock, heading) : cornerMode(el, dock);
         ScrollTrigger.create({
           start: 0,
           end: "max",
           onUpdate: (self) => {
-            target();
+            place.update();
             step(self.getVelocity());
           },
-          onRefresh: () => target(true),
+          onRefresh: () => place.update(true),
         });
 
-        // Section stops: change the face, and nudge toward that section's heading as it arrives.
-        const nudge = q(".av-nudge")[0];
+        // Section stops: change the face (and, per mode, nudge or hop) as each section arrives.
         const stops = STOPS.flatMap((s) => {
           const node = document.querySelector<HTMLElement>(s.sel);
           return node ? [{ face: s.face, node }] : [];
@@ -226,7 +178,85 @@ export function AvatarGuide() {
             end: next ? "top 55%" : "max",
             onEnter: () => {
               setFace(s.face);
-              const head = s.node.querySelector("h2, h3");
+              place.arrive(s.node);
+            },
+            onEnterBack: () => setFace(s.face),
+          });
+        });
+        if (!current) setFace("hello");
+
+        // The two sideways pins slide cards through the left edge, where both modes live, so it
+        // steps aside from the moment either pins until that section has scrolled off the top
+        // (after the pin releases, the row stays slid left). The pin-spacer spans the pinned scroll.
+        document.querySelectorAll<HTMLElement>(".notes-pin, .rec-pin").forEach((pin) => {
+          ScrollTrigger.create({
+            trigger: pin.closest(".pin-spacer") ?? pin,
+            start: "top top",
+            end: "bottom top",
+            onToggle: (self) => place.pinned(self.isActive),
+          });
+        });
+
+        return () => blinkCall?.kill();
+
+        // ---- "walk": down the empty margin ------------------------------------------------------
+        function walkMode(el: HTMLElement, d0: HTMLElement, h0: HTMLElement) {
+          // quickTo = a reusable tween that eases toward each new target: the "walking pace" lag
+          // (like scrub: 1, but for a position we compute ourselves every scroll frame).
+          // One property per quickTo: "scale" is a shorthand GSAP splits into scaleX + scaleY, so a
+          // quickTo on it can't be retargeted (Chromium then left it stuck at the docked size).
+          const xTo = gsap.quickTo(el, "x", { duration: 1, ease: "power3" });
+          const yTo = gsap.quickTo(el, "y", { duration: 1, ease: "power3" });
+          const sxTo = gsap.quickTo(el, "scaleX", { duration: 1, ease: "power3" });
+          const syTo = gsap.quickTo(el, "scaleY", { duration: 1, ease: "power3" });
+          const clamp01 = gsap.utils.clamp(0, 1);
+
+          // The docked copy hides while this one is out walking (matchMedia restores it on revert).
+          gsap.set(d0, { autoAlpha: 0 });
+          gsap.set(el, { transformOrigin: "50% 50%" });
+
+          // Scroll position → where the avatar should be:
+          // 1. At the top it sits exactly on the docked copy (scaled down to its 40px).
+          // 2. Over the first 240px it detaches: slides into the free margin and grows to 64px.
+          // 3. Its height follows page progress, from the top of the screen down to a "landing line"
+          //    near the bottom, reached when the contact heading arrives at that line.
+          // 4. After that it stays beside "Have something worth building?" and scrolls up with it.
+          const update = (snap = false) => {
+            const vw = document.documentElement.clientWidth;
+            const vh = window.innerHeight;
+            const sy = window.scrollY;
+            const d = d0.getBoundingClientRect();
+            const dockScale = d.width / SIZE;
+            const dockX = d.left + d.width / 2 - SIZE / 2;
+            const dockY = d.top + sy + d.height / 2 - SIZE / 2; // in page coordinates (the header scrolls)
+            const contentLeft = Math.max(0, (vw - SHELL) / 2) + PAD;
+            const gutterX = contentLeft - SIZE - 24;
+            const landY = vh - SIZE - 48;
+            const h = h0.getBoundingClientRect();
+            const headingY = h.top + Math.min(h.height, 140) / 2 - SIZE / 2; // beside its first line
+            const landAt = Math.max(1, sy + headingY - landY); // scroll position where they meet
+
+            const detach = clamp01(sy / 240);
+            const walk = clamp01(sy / landAt);
+            const x = dockX + (gutterX - dockX) * detach;
+            const y = sy <= landAt ? dockY + (landY - dockY) * walk : Math.max(16, headingY);
+            const s = dockScale + (1 - dockScale) * detach;
+            if (snap) gsap.set(el, { x, y, scaleX: s, scaleY: s });
+            else {
+              xTo(x);
+              yTo(y);
+              sxTo(s);
+              syTo(s);
+            }
+          };
+          update(true);
+          gsap.to(el, { autoAlpha: 1, duration: 0.2 });
+
+          return {
+            update,
+            // Nudge toward the arriving section's heading, then drift back.
+            arrive(node: HTMLElement) {
+              const head = node.querySelector("h2, h3");
               if (!head) return;
               const delta = head.getBoundingClientRect().top - el.getBoundingClientRect().top - SIZE / 4;
               gsap
@@ -234,36 +264,65 @@ export function AvatarGuide() {
                 .to(nudge, { y: gsap.utils.clamp(-40, 40, delta), duration: 0.6, ease: "power2.out" })
                 .to(nudge, { y: 0, duration: 1.2, ease: "power2.inOut" }, "+=0.8");
             },
-            onEnterBack: () => setFace(s.face),
-          });
-        });
-        if (!current) setFace("hello");
+            pinned: (on: boolean) => gsap.to(el, { autoAlpha: on ? 0 : 1, duration: 0.3 }),
+          };
+        }
 
-        // The two sideways pins slide cards through the margin it walks in, so it steps aside
-        // (fades out) from the moment either pins until that section has scrolled off the top:
-        // after the pin releases, the row stays slid left, with cards still in the margin.
-        // (The pin-spacer GSAP wraps around each pinned block spans the whole pinned scroll.)
-        document.querySelectorAll<HTMLElement>(".notes-pin, .rec-pin").forEach((pin) => {
-          ScrollTrigger.create({
-            trigger: pin.closest(".pin-spacer") ?? pin,
-            start: "top top",
-            end: "bottom top",
-            onToggle: (self) => gsap.to(el, { autoAlpha: self.isActive ? 0 : 1, duration: 0.3 }),
-          });
-        });
+        // ---- "corner": a small companion in the bottom-left corner -------------------------------
+        function cornerMode(el: HTMLElement, d0: HTMLElement) {
+          // 40px on phones, 44px elsewhere; scaled from its bottom-left corner, which CSS pins
+          // 16px from the screen's bottom-left (above the iPhone home bar).
+          const s = (matchMedia("(max-width: 767px)").matches ? 40 : 44) / SIZE;
+          gsap.set(el, { scaleX: s, scaleY: s, transformOrigin: "0% 100%" });
+          // It steps aside wherever it would cover something you type into or tap at the end of the
+          // page: the contact form, the email link and copy button, the social icons, the footer links.
+          const controls = [
+            ...document.querySelectorAll<HTMLElement>("#contact input, #contact textarea, #contact button, #contact a, #contact .social-item, footer a"),
+          ];
+          let inPin = false;
+          let shown = false;
 
-        return () => blinkCall?.kill();
+          const update = () => {
+            const box = el.getBoundingClientRect();
+            const near = (r: DOMRect) => r.width > 0 && r.left < box.right + 8 && r.right > box.left - 8 && r.top < box.bottom + 8 && r.bottom > box.top - 8;
+            // Shown once the docked copy has scrolled out of view, so there's never two of him.
+            const dockGone = d0.getBoundingClientRect().bottom < 0;
+            const overControl = controls.some((c) => near(c.getBoundingClientRect()));
+            const want = dockGone && !overControl && !inPin;
+            if (want === shown) return;
+            shown = want;
+            gsap.to(el, { autoAlpha: want ? 1 : 0, duration: 0.25, overwrite: "auto" });
+            // Hop in from below when it appears.
+            if (want) gsap.fromTo(nudge, { y: 14 }, { y: 0, duration: 0.45, ease: "back.out(2.2)" });
+          };
+          update();
+
+          return {
+            update,
+            // A small hop when a new section (and face) arrives.
+            arrive: () => {
+              if (shown) gsap.fromTo(nudge, { y: 0 }, { y: -6, duration: 0.14, ease: "power1.out", yoyo: true, repeat: 1 });
+            },
+            pinned: (on: boolean) => {
+              inPin = on;
+              update();
+            },
+          };
+        }
       }
 
       return () => mm.revert();
     },
+    // No `dependencies`: a mode change remounts this component (AvatarGuideLoader gives it a `key`).
     { scope: ref },
   );
 
-  // Decorative only: hidden from assistive tech and never in the way of a click.
-  // `invisible` until the walk starts, so it never shows without JavaScript or on small screens.
+  // Decorative only: hidden from assistive tech and never in the way of a tap or click.
+  // `invisible` until GSAP shows it, so it never appears without JavaScript.
+  const position =
+    mode === "walk" ? "top-0 left-0" : "bottom-[calc(1rem+env(safe-area-inset-bottom))] left-4";
   return (
-    <div ref={ref} aria-hidden className="pointer-events-none invisible fixed top-0 left-0 z-30 size-16">
+    <div ref={ref} aria-hidden className={`pointer-events-none invisible fixed z-30 size-16 ${position}`}>
       <div className="av-nudge size-full">
         <div className="av-walk size-full">
           <AvatarFace className="size-full" />

@@ -75,3 +75,12 @@ Entry format:
 - **Your task (TODO(human)):** skipped in ship mode. Submit the form twice quickly with the same text and see both rows in Neon; then think about how you'd add an idempotency key, exactly like FOS orders.
 
 ---
+
+### Phase 7 — Browser-only code (`ssr: false`) and secrets that stay on the server
+- **What it is:** Every client component is *also* rendered on the server first. Code that touches `localStorage` while rendering would crash there, so `next/dynamic(() => import(...), { ssr: false })` skips server rendering for that component (it's only allowed inside a `"use client"` file). Separately, an API key in a client component ships to every visitor, so the weather fetch moved into a Server Action, where `process.env.OPENWEATHER_API_KEY` stays private.
+- **Where it lives:** `src/components/playground/apps.tsx:10` (`ssr: false`), `src/app/actions/weather.ts:11` (server-side fetch), `src/components/playground/WeatherChecker.tsx:42` (`useTransition` calling the action on submit)
+- **Common mistake:** "fixing" the localStorage crash with `typeof window !== "undefined"` inside `useState`. The server renders the empty state, the browser renders saved data, and React reports a hydration mismatch. Either skip SSR for that component, or read storage after mount.
+- **AMS bridge:** the AMS web app will hold a Spring Boot JWT. Keep it in an httpOnly cookie read by Server Components/Actions, never in `localStorage` in client code, for the same reason the weather key moved.
+- **Your task (TODO(human)):** skipped in ship mode. Rotate your OpenWeather key (the old one is public in the 2025 repo), add the new one to `.env.local` and Vercel, and check `/playground/weather-checker`.
+
+---

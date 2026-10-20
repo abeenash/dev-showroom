@@ -7,6 +7,7 @@ import { Hero } from "@/components/sections/Hero";
 import { Notes } from "@/components/sections/Notes";
 import { PinnedStory } from "@/components/sections/PinnedStory";
 import { Recognition } from "@/components/sections/Recognition";
+import { Started } from "@/components/sections/Started";
 import { Videos } from "@/components/sections/Videos";
 import { Work } from "@/components/sections/Work";
 import { RevealRoot } from "@/components/motion/RevealRoot";
@@ -35,6 +36,7 @@ export default function Home() {
           <Notes n={n()} />
           <About n={n()} />
           <Recognition n={n()} />
+          <Started n={n()} />
           <Contact n={n()} />
         </main>
       </RevealRoot>

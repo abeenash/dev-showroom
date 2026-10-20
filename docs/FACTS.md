@@ -5,7 +5,14 @@ Sources: CV (Oct 2026), the RMS repo and its logbooks #5–#10, the AMS repo, an
 Status: ✅ verified · ❓ needs Abinash
 
 ## Identity
-- ✅ Name: Abinash Adhikari. GitHub: `github.com/abeenash`. LinkedIn: `https://www.linkedin.com/in/abinash-adhikari-801148303`
+- ✅ Name: Abinash Adhikari.
+- ✅ Links (round 3; the Contact section is their single home on the site):
+  - LinkedIn: `https://www.linkedin.com/in/abinash-adhikari-801148303`
+  - GitHub: `https://github.com/abeenash`
+  - Instagram: `https://www.instagram.com/a_bee_nash/`
+  - Facebook: `https://www.facebook.com/abinash.adhikari.395` (the clean profile URL his share link redirects to)
+- ✅ Contact-form notifications go to Abinash's inbox (`CONTACT_TO_EMAIL`, set only in env vars; never shown on the site beyond the public email below).
+- ✅ His look, for the "little me" avatar (round 3): messy black hair, thick square black glasses. Drawn as a flat cartoon in the site palette, not a photo or caricature.
 - ✅ Role title: Mobile & Full-Stack Developer
 - ✅ Intro line (Abinash's words): "I build mobile apps and the backends behind them, then I record myself explaining how they work."
 - ✅ Based in Nakkhu, Lalitpur, Nepal

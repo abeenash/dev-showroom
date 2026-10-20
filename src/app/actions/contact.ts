@@ -5,9 +5,11 @@
 import { createHash } from "node:crypto";
 import { and, count, eq, gt } from "drizzle-orm";
 import { headers } from "next/headers";
+import { after } from "next/server";
 import { z } from "zod";
 import { site } from "@/content/site";
 import { getDb, schema } from "@/db";
+import { notifyNewMessage } from "@/lib/notify";
 
 export type ContactState = {
   status: "idle" | "ok" | "error";
@@ -77,6 +79,10 @@ export async function sendMessage(_prev: ContactState, formData: FormData): Prom
     console.error("contact: database error", err);
     return { status: "error", message: `Something went wrong on my side. ${fallback}`, values };
   }
+
+  // Saved. The email to Abinash runs after the response is sent, so the visitor sees
+  // "Thanks" straight away; on Vercel, after() keeps the function alive until it finishes.
+  after(() => notifyNewMessage(parsed.data));
 
   return { status: "ok", name: parsed.data.name };
 }

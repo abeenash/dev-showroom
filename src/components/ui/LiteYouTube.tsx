@@ -30,11 +30,15 @@ export function LiteYouTube({ video, size = "lg" }: Props) {
               setOn(true);
             }}
             className={`group absolute inset-0 flex flex-col justify-between text-left ${lg ? "p-5" : "p-4"}`}
-            aria-label={`Play video: ${video.title}`}
           >
-            <span className="label">YouTube</span>
+            {/* The accessible name comes from the content ("Play video: <title>"), so it contains
+                the visible title, as WCAG 2.5.3 asks. */}
+            <span aria-hidden className="label">
+              YouTube
+            </span>
             <span className="flex items-end justify-between gap-4">
               <span className={`font-serif italic leading-none ${lg ? "line-clamp-3 text-2xl md:text-3xl" : "line-clamp-4 text-lg"}`}>
+                <span className="sr-only">Play video: </span>
                 {video.title}
               </span>
               <span

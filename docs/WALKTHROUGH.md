@@ -26,7 +26,7 @@ Folders: `src/content/` holds every fact on the site (typed, from `docs/FACTS.md
 1. Vercel serves `/` as a ready-made HTML file. It was rendered once, during `npm run build`, from `src/app/page.tsx`, so there's no server work per visit.
 2. The HTML already contains every word and every `<img srcset>`. The root layout (`src/app/layout.tsx:32`) wrapped it with the header, grid lines and footer, and put a tiny inline script in `<head>` (`src/components/layout/ThemeScript.tsx:7`). That script runs before first paint: it applies a saved dark/light choice and adds the `js` class.
 3. The browser downloads only the JavaScript for the client islands: ThemeToggle, Clock, the motion wrappers, PinnedStory, Lightbox and ContactForm. React **hydrates** them, meaning it attaches to the HTML that's already there rather than re-drawing it.
-4. The Clock reads the time (it rendered nothing on the server on purpose, `src/components/ui/Clock.tsx:22`). GSAP splits the hero name into lines and slides them up (`src/components/motion/HeroMotion.tsx:21`), and ScrollTriggers pin the RMS phone and the logbook strip, but only on desktop with motion allowed (`gsap.matchMedia()`).
+4. The Clock reads the time (it rendered nothing on the server on purpose, `src/components/ui/Clock.tsx:22`). GSAP splits the hero name into lines and slides them up (`src/components/motion/HeroMotion.tsx:21`), and ScrollTriggers pin the RMS phone, the logbook strip and the Recognition story, but only on desktop with motion allowed (`gsap.matchMedia()`).
 
 **The visitor sends a message.**
 1. `<form action={action}>` in `src/components/sections/ContactForm.tsx:28` posts the fields to the Server Action `sendMessage` (`src/app/actions/contact.ts:32`). With JS on, React does this with `fetch` and keeps the page; with JS off, the browser does a normal form POST. Both work.
@@ -39,7 +39,7 @@ Folders: `src/content/` holds every fact on the site (typed, from `docs/FACTS.md
 
 ### 1 — Server Components by default, client islands where needed
 - **What it is:** Components render on the server into HTML and send no JavaScript, unless the file starts with `"use client"`. Only pieces that need state, effects or browser APIs are client components, and a server component can render them and pass them props or `children`.
-- **Where it lives:** `src/app/page.tsx:23` (server page), `src/components/sections/Recognition.tsx:36` (server list → client `Lightbox`), `src/components/motion/RevealRoot.tsx` (client wrapper around server children)
+- **Where it lives:** `src/app/page.tsx:23` (server page), `src/components/sections/Recognition.tsx:17` (server cards → client `Lightbox`), `src/components/motion/RevealRoot.tsx` (client wrapper around server children)
 - **Common mistake:** putting `"use client"` at the top of a whole page because one button needs `onClick`. The whole subtree then ships as JS.
 - **AMS bridge:** AMS web's dashboard, notices list and attendance tables are server components that fetch from Spring Boot; only filters, "mark present" toggles and dialogs are client islands.
 
@@ -75,8 +75,8 @@ Folders: `src/content/` holds every fact on the site (typed, from `docs/FACTS.md
 
 ### 7 — Animation libraries in the App Router
 - **What it is:** GSAP runs only in client wrappers. `useGSAP` records and reverts everything on unmount, and `gsap.matchMedia()` adds or removes pins as the screen size or reduced-motion setting changes. Tweens created after an `await` must go through `context.add()`.
-- **Where it lives:** `src/lib/gsap.ts`, `src/components/motion/HeroMotion.tsx:28`, `src/components/sections/PinnedStory.tsx:60`, `src/components/motion/HorizontalPin.tsx:14`
-- **Common mistake:** "ghost" ScrollTriggers after navigating, caused by tweens created outside the context. (Verified here: 2 pins on the home page → 0 on `/work/rms` → 2 after going back.)
+- **Where it lives:** `src/lib/gsap.ts`, `src/components/motion/HeroMotion.tsx:28`, `src/components/sections/PinnedStory.tsx:60`, `src/components/motion/HorizontalPin.tsx:27`
+- **Common mistake:** "ghost" ScrollTriggers after navigating, caused by tweens created outside the context. (Verified here: 3 pins on the home page → 0 on `/work/rms` → 3 after going back.)
 - **AMS bridge:** chart or calendar libraries for AMS web get the same treatment: a thin client wrapper with data passed in.
 
 ### 8 — Images and fonts handled by the framework
@@ -98,39 +98,122 @@ Folders: `src/content/` holds every fact on the site (typed, from `docs/FACTS.md
 
 ---
 
-## 4. MISSING: left out until you provide it
+## 4. Round 2: corrections, new content, two design upgrades
 
-Nothing on the site says "TODO"; these things are simply absent. Add the item and the element comes back.
+Same format as above: what I built, what happens at runtime, why this way, try it yourself, and the AMS bridge.
 
-- **CV PDF**: put it at `public/abinash-adhikari-cv.pdf` and add a "CV (PDF)" link in `src/components/sections/Hero.tsx`.
-- **YouTube links**: add them to `src/content/videos.ts`; the Videos section appears automatically, numbered correctly.
-- **Your own handwritten margin notes** for the Work rows (only the Research line is live).
-- **RMS receipt screenshot**, with branding cropped (re-adds a "bill gets printed" step).
-- **Year of the BIM 5th-semester topper result.**
-- **Vendora / Bibhid live links**, and **Bibhid's year**.
-- **Growth Forum Nepal paper title.**
-- **Event name** for the hosting photo.
-- **The real RMS backstory** (what staff did before the app), for a "The problem" section in the case study.
-- **Logbooks #1–#4**, if they exist.
-- **Domain name** → `NEXT_PUBLIC_SITE_URL`.
-- **A fresh OpenWeather key** → `OPENWEATHER_API_KEY` (the old one is public in the 2025 repo).
+### R1 — Renaming the restaurant app to RMS (routes and static params)
+- **What I built:** the slug changed in two content files: `src/content/projects.ts:58` and `src/content/case-studies.ts:22`. The screenshot folder moved to `public/shots/rms` with `git mv`, so git records a rename rather than a delete plus an add. Every identifier, alt text, heading and doc changed with it. AMS lost "with a teammate". LinkedIn and the Notes App link were fixed. The hero has your full line, and GitHub moved to Contact and the footer.
+- **What happens at runtime:** nothing happens at request time. During `npm run build`, Next calls `generateStaticParams()` (`src/app/work/[slug]/page.tsx:9`). That returns `[{ slug: "rms" }]` because it maps over `caseStudies`, so the build output lists `● /work/rms`. The old slug is no longer generated, and `dynamicParams = false` (`:14`) turns it into a 404 instead of trying to render it on demand.
+- **Why this way:** the route file never mentions a project. The slug lives only in content, so a rename is a content change and the routing follows. TanStack's `createFileRoute` + `loader` worked the same way, but Next pre-builds the page as HTML. A rename on a live site would also need a redirect (`redirects()` in `next.config.ts`) so old links and search results keep working. The site isn't deployed yet, so none was needed.
+- **Try it yourself:** change `slug: "rms"` to `"rms-app"` in `case-studies.ts` only, then run `npm run build`. The route list shows `/work/rms-app`, and the Work row's "Read the case study" link now 404s, because it builds `/work/${p.slug}` from `projects.ts`. That's why both files must agree.
+- **AMS bridge:** if you rename "Subjects" to "Courses" in AMS web, rename the route folder (`app/courses/[code]`) and add a permanent redirect from the old path in `next.config.ts`, because by then real users will have bookmarks.
+
+### R2 — New content from your own words
+- **What I built:**
+  - Five videos with their real YouTube titles, fetched from YouTube's oEmbed API (`src/content/videos.ts`). There are no durations, because none are verified, and a smaller "Security labs" row carries your caption.
+  - Each video tile has an anchor (`src/components/ui/LiteYouTube.tsx:15`), so the Vendora row can link straight to its two videos.
+  - Your approved handwritten notes sit under the phone screens (`src/content/projects.ts:68`, `:82`).
+  - The three Recognition captions, the Orchid Dashain Utsav 2083 caption, and your "The problem" text. That text is one constant (`projects.ts:53`) used by both the RMS row and the case study.
+- **What happens at runtime:** this is all static content. Clicking a video tile swaps the tile for a `youtube-nocookie.com` iframe. Until then, no YouTube code or cookies load.
+- **Why this way:** one constant used in two places can't drift apart. The Shot type gained an optional `note`, so the note travels with the screenshot it describes.
+- **Try it yourself:** add `{ ...screens.amsOffline, note: "…" }` as a third AMS shot and watch the row lay out three phones.
+- **AMS bridge:** the same "content in typed files" idea gives AMS one source for role names, notice categories or grading thresholds, shared by the server pages and client forms.
+
+### R3 — One pin component, two sections (Notes and Recognition)
+- **What I built:**
+  - `HorizontalPin` (`src/components/motion/HorizontalPin.tsx:21`) now takes `pin` and `track` selectors and an optional `speed`. Notes passes `.notes-pin` / `.notes-track` (`src/components/sections/Notes.tsx:11`), and Recognition passes `.rec-pin` / `.rec-track` with `speed={0.55}` (`src/components/sections/Recognition.tsx:47`).
+  - Recognition is now one row of chapter cards, award cards and image cards (`Recognition.tsx:17`). Clicking an image zooms it in the existing Lightbox, which gained a `start` prop (`src/components/ui/Lightbox.tsx:20`).
+- **What happens at runtime (desktop, motion allowed):**
+  1. `gsap.matchMedia()` runs the handler (`HorizontalPin.tsx:27`).
+  2. The handler measures how far the row must slide: its full width minus the window width (`:31`).
+  3. It creates one tween whose ScrollTrigger pins the section for that distance × `speed` and scrubs `x` from 0 to minus that distance.
+  4. When the row's images finish loading, it calls `ScrollTrigger.refresh()` once (`:62`).
+  5. If you Tab to a card that's off to the right, a `focusin` handler (`:47`) scrolls the page to the point where that card has slid into view.
+- **Why this way:**
+  - **No duplicated code:** one component means one place to fix bugs.
+  - **Selectors, not refs:** the cards are Server Components, so the client wrapper can't hand refs to them. Selectors scoped to the wrapper (`useGSAP`'s `scope`) find the elements without turning the content into client code.
+  - **Page order:** two pins on one page must be created top to bottom, so the lower one measures its start after the upper one's spacer exists. Effects run in mount order, which is page order (verified: story → notes → recognition).
+  - **No layout shift:** every image card has a fixed height and a width taken from the static import's aspect ratio. The row's length is right before any image arrives, which is why CLS stays at 0.
+  - **Less scrolling:** `speed` below 1 makes the row move faster than you scroll.
+  - **`overflow-clip`:** the section uses it instead of `overflow-hidden`, because a hidden overflow can still be scrolled by the browser when a link inside it gets focus.
+- **Try it yourself:** set `speed={1}` on Recognition and feel how much longer the section gets. Then remove `invalidateOnRefresh` and resize the window mid-pin: the row's end position goes stale.
+- **AMS bridge:** a generic "pinned horizontal timeline" could show a student's semester-by-semester results. Pass it the selectors and it works anywhere.
+
+### R3 — Scroll-snap as the no-JavaScript mobile fallback
+- **What I built:** without the pin, each Recognition group is a horizontal row: `overflow-x-auto` with `snap-x snap-mandatory` on the container and `snap-start` on each card (`Recognition.tsx:63`). The row sits inside a `role="region"` with an `aria-label` and `tabIndex={0}` (`:60`), plus a small "swipe →" hint.
+- **What happens at runtime:** the browser does all of it. Swiping scrolls the row, and when you let go it settles with a card's left edge aligned (snap). The region is focusable, so the arrow keys scroll it, and screen readers announce "Academics: scroll sideways for more".
+- **Why this way:** CSS scroll-snap has no JavaScript, no library and no main-thread work, and it works with JS off. The pinned version and the swipe rows are the same HTML; the `lg:motion-safe:js:` classes decide which layout applies. The condition matches HorizontalPin's `matchMedia` exactly, so the CSS and the JS can never disagree.
+- **Try it yourself:** in DevTools, emulate `prefers-reduced-motion: reduce` on a desktop window. The pin disappears and you get three swipe rows, with the same markup.
+- **AMS bridge:** on AMS mobile web, a horizontal row of subject cards or a day-picker strip is a scroll-snap row, with no carousel library.
+
+### R4 — The "spreading" theme switch (View Transitions API)
+- **What I built:**
+  - The toggle (`src/components/layout/ThemeToggle.tsx:59`) shows a moon in light mode and a sun in dark mode. CSS picks the icon from the same selectors as the colour tokens (`src/app/globals.css:225`), so it's right from the first paint.
+  - The reveal is pure CSS (`globals.css:256` to `:274`).
+  - `<meta name="theme-color">` is set by the inline script before paint (`src/components/layout/ThemeScript.tsx:7`) and kept in sync by the toggle.
+- **What happens at runtime:**
+  1. On click, the button's centre `(x, y)` and the distance to the farthest screen corner (`Math.hypot`, `:71`) are written to `--theme-x`, `--theme-y` and `--theme-radius` on `<html>`. The class `theme-reveal` is added.
+  2. `document.startViewTransition(() => apply(next))` (`:79`) runs.
+  3. **The browser takes a screenshot of the page as it is now** (old theme) and keeps it as `::view-transition-old(root)`.
+  4. It runs the callback, which sets `data-theme`. Every CSS variable flips at once, but you don't see it yet.
+  5. It shows the **live new page** as `::view-transition-new(root)`, stacked above the old screenshot.
+  6. Normally the two crossfade. The CSS turns that off and instead animates the new layer's `clip-path` from `circle(0)` to `circle(radius)` around the button, over 0.65s with `cubic-bezier(0.22, 1, 0.36, 1)`: a fast start and a long, soft finish. Outside the circle you still see the old screenshot, inside it the new page, so the theme looks like it spreads out from the button.
+  7. When `transition.finished` resolves, the class is removed (`:80`).
+- **Why the circle works:** the radius is the distance to the *farthest* corner, so the final circle covers the whole viewport whichever corner the button is in. Animating a `clip-path` on a snapshot is cheap: the browser isn't re-laying out the page 60 times a second, just revealing more of an image it already has.
+- **Why this way:**
+  - **Turning the "dark" class on yourself:** just flipping `data-theme` changes everything in one frame, and there's no way to animate "every colour on the page" from a single point.
+  - **No overlay element:** a circular overlay div could only fake it with one colour. The View Transitions API animates the actual page.
+  - **The toggle stays crisp:** it has its own `view-transition-name` (`globals.css:253`), so it's captured separately and drawn above the reveal.
+  - **Fallbacks:** without View Transitions support, or with reduced motion (`ThemeToggle.tsx:62`), the theme switches instantly. The no-flash inline script is untouched.
+  - **No jumps in the pins:** the theme changes colours, not sizes, so the ScrollTrigger pins needed no refresh. Verified: toggling inside the Notes and Recognition pins left the scroll position and both row transforms identical.
+- **Try it yourself:** change `0.65s` to `3s` in `globals.css` and toggle slowly, to watch the old screenshot and the live page side by side. Then change `circle(...)` to `inset(0 0 0 100%)` → `inset(0)` for a wipe instead.
+- **AMS bridge:** Next.js can drive View Transitions on route changes, for example a smooth crossfade from the subject list into a subject's page. The same "old snapshot, new live page" model applies.
 
 ---
 
-## 5. Deploy and domain
+## 5. MISSING: left out until you provide it
+
+Nothing on the site says "TODO"; these things are simply absent. Add the item and the element comes back.
+
+- **A public CV PDF.** The one you gave me shows your phone number, your two references' phone numbers and your old LinkedIn URL, so I didn't publish it. It's kept at `assets-src/cv/` (not committed). Re-export it without phone numbers or the references page and with the new LinkedIn URL, save it as `public/Abinash_Adhikari_CV.pdf`, and add the one-line link back in `src/components/sections/Hero.tsx` (the comment there shows it). `next.config.ts:6` already serves it inline with that filename.
+- **Fundamentals of Cloud Computing certificate.** Once you find it, it becomes another Research or Competitions card.
+- **RMS and AMS walkthrough videos.** Add them to `src/content/videos.ts` and they join the main row.
+- **`OPENWEATHER_API_KEY` in Vercel.** Use the new key that's in `.env.local`.
+
+---
+
+## 6. Deploy and domain (abinasha.com.np)
 
 1. **Push to GitHub.** Create an empty repo on github.com (no README), then: `git remote add origin https://github.com/abeenash/<repo>.git` and `git push -u origin master`.
 2. **Import on Vercel.** vercel.com → Add New → Project → pick the repo. Framework auto-detects as Next.js; leave the build settings alone.
-3. **Environment variables** (Project → Settings → Environment Variables, for Production *and* Preview):
-   - `DATABASE_URL`: the same Neon connection string as in your `.env.local`. The `messages` table already exists there; I ran the migration.
-   - `NEXT_PUBLIC_SITE_URL`: `https://<your-domain>` with no trailing slash. Set it **before** the first deploy, because it's baked in at build time.
-   - `OPENWEATHER_API_KEY`: a newly rotated key.
-4. **Deploy**, then open the `*.vercel.app` URL and check `/`, `/work/rms`, a playground app, and send yourself a test message.
-5. **Custom domain.** Project → Settings → Domains → add `<your-domain>` (and `www.<your-domain>`, set to redirect to the apex). Vercel then shows the exact DNS records:
-   - If your registrar lets you edit records: an **A** record for `@` and a **CNAME** for `www`, with the values Vercel displays.
-   - If it only lets you set nameservers (common for `.com.np`): use `ns1.vercel-dns.com` and `ns2.vercel-dns.com`.
-   - HTTPS is issued automatically once DNS resolves (minutes to a few hours).
-6. **If the domain differs** from what you put in `NEXT_PUBLIC_SITE_URL`, update it and click **Redeploy**.
-7. **Check after launch:** `https://<domain>/sitemap.xml` and `/robots.txt` show your domain; paste the URL into a social-card preview tool to see the OG image; read messages in the Neon console → Tables → `messages` (an admin page is on the "later" list).
+3. **Environment variables** (Project → Settings → Environment Variables, for Production *and* Preview), **before** the first deploy:
+   - `DATABASE_URL`: the same Neon connection string as in your `.env.local`. The `messages` table already exists.
+   - `NEXT_PUBLIC_SITE_URL`: `https://abinasha.com.np` (no trailing slash). It's baked in at build time, which is why it must be set first.
+   - `OPENWEATHER_API_KEY`: the key from your `.env.local`.
+4. **Deploy**, then open the `*.vercel.app` URL and check `/`, `/work/rms`, the videos, a playground app, and send yourself a test message.
+5. **Add the domain in Vercel.** Project → Settings → Domains → add `abinasha.com.np`, then add `www.abinasha.com.np` and set it to redirect to `abinasha.com.np`. Vercel will say the domain isn't configured yet. That's expected.
+6. **Point the nameservers at Vercel (register.com.np).** `.com.np` domains are managed at register.com.np, where you can set nameservers but usually not individual records. Log in → your domain → nameserver settings, and replace the current ones with:
+   - `ns1.vercel-dns.com`
+   - `ns2.vercel-dns.com`
+
+   Save. If the panel asks for a reason or approval, follow it; `.np` changes are sometimes reviewed by hand.
+7. **Wait.** Nameserver changes for `.np` can take **a few hours, sometimes up to 24–48 hours**. Vercel's Domains page turns green when it sees them, and then issues the HTTPS certificate automatically. Nothing on your side needs to change while you wait; the `*.vercel.app` URL keeps working.
+   - With Vercel's nameservers, Vercel now runs all DNS for the domain. If you later want email at `@abinasha.com.np`, add its MX records in Vercel → Domains → DNS records.
+8. **Check after launch:** `https://abinasha.com.np/sitemap.xml` and `/robots.txt` show the domain; paste the URL into a social-card preview tool to see the OG image; toggle the theme; read messages in the Neon console → Tables → `messages`.
+
+**Day-to-day commands:** `npm run dev` · `npm run lint` · `npm run build` · `npm run images` (re-generate web images after adding raw files to `assets-src/`) · `npm run db:generate` then `npm run db:migrate` (after editing `src/db/schema.ts`).
+
+---
+
+## 7. Things I wasn't sure about
+
+- **The CV:** you asked for it to be linked, but publishing it would publish three phone numbers, two of them other people's. I chose not to (see MISSING).
+- **`.env.example`:** your editor saved the OpenWeather key into it again after I'd moved it to `.env.local`. The committed `.env.example` has an empty key; I've staged around the local edit ever since. Clear the value there before your next `git add -A`.
+- **Video titles** are exactly as on YouTube, including the lowercase "notes app using react native". If you'd like it capitalised, rename it on YouTube and update `src/content/videos.ts`.
+- **The Vendora row's link labels** ("Vendora explained", "Containerizing Vendora with Docker") are your descriptions from chat, not the YouTube titles.
+- **AMS on the home page** now shows "attendance history" and "Attendance submitted" (the two screens with your notes). The offline-banner screenshot is no longer on the home page.
+- **Recognition is long** even at `speed={0.55}`: about 6,000px of scrolling on a 900px-tall screen, because there are 13 images. To shorten it, lower `speed` again or drop a felicitation photo.
+- **The theme reveal starts from the button,** which is in the header at the top of the page. If the header ever becomes sticky, the reveal will also start correctly mid-page.
 
 **Day-to-day commands:** `npm run dev` · `npm run lint` · `npm run build` · `npm run images` (re-generate web images after adding raw files to `assets-src/`) · `npm run db:generate` then `npm run db:migrate` (after editing `src/db/schema.ts`).

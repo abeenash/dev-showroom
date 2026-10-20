@@ -129,9 +129,12 @@ export function AvatarGuide() {
         // ---- The walk ---------------------------------------------------------------------------
         // quickTo = a reusable tween that eases toward each new target: the "walking pace" lag
         // (like scrub: 1, but for a position we compute ourselves every scroll frame).
+        // One property per quickTo: "scale" is a shorthand GSAP splits into scaleX + scaleY, so a
+        // quickTo on it can't be retargeted (Chromium then left it stuck at the docked size).
         const xTo = gsap.quickTo(el, "x", { duration: 1, ease: "power3" });
         const yTo = gsap.quickTo(el, "y", { duration: 1, ease: "power3" });
-        const sTo = gsap.quickTo(el, "scale", { duration: 1, ease: "power3" });
+        const sxTo = gsap.quickTo(el, "scaleX", { duration: 1, ease: "power3" });
+        const syTo = gsap.quickTo(el, "scaleY", { duration: 1, ease: "power3" });
         const clamp01 = gsap.utils.clamp(0, 1);
 
         // Scroll position → where the avatar should be:
@@ -160,17 +163,53 @@ export function AvatarGuide() {
           const x = dockX + (gutterX - dockX) * detach;
           const y = sy <= landAt ? dockY + (landY - dockY) * walk : Math.max(16, headingY);
           const s = dockScale + (1 - dockScale) * detach;
-          if (snap) gsap.set(el, { x, y, scale: s });
+          if (snap) gsap.set(el, { x, y, scaleX: s, scaleY: s });
           else {
             xTo(x);
             yTo(y);
-            sTo(s);
+            sxTo(s);
+            syTo(s);
           }
         };
+
+        // Walking: while you scroll it sways side to side with a small bounce, and settles when you
+        // stop. Its own wrapper (.av-walk), so it never fights the position or the nudge.
+        const walker = q(".av-walk")[0];
+        const bob = gsap
+          .timeline({ paused: true, repeat: -1, defaults: { duration: 0.17, ease: "sine.inOut" } })
+          .to(walker, { rotation: 7, y: -3 })
+          .to(walker, { rotation: 0, y: 0 })
+          .to(walker, { rotation: -7, y: -3 })
+          .to(walker, { rotation: 0, y: 0 });
+        let walking = false;
+        let settle: gsap.core.Tween | undefined;
+        const step = (velocity: number) => {
+          if (Math.abs(velocity) < 30) return;
+          if (!walking) {
+            walking = true;
+            bob.invalidate().restart(); // start a fresh stride from the upright pose
+          }
+          settle?.kill();
+          settle = gsap.delayedCall(0.2, () => {
+            walking = false;
+            bob.pause();
+            gsap.to(walker, { rotation: 0, y: 0, duration: 0.25, ease: "power2.out" });
+          });
+        };
+
         gsap.set(el, { transformOrigin: "50% 50%" });
+        gsap.set(walker, { transformOrigin: "50% 90%" });
         target(true);
         gsap.to(el, { autoAlpha: 1, duration: 0.2 });
-        ScrollTrigger.create({ start: 0, end: "max", onUpdate: () => target(), onRefresh: () => target(true) });
+        ScrollTrigger.create({
+          start: 0,
+          end: "max",
+          onUpdate: (self) => {
+            target();
+            step(self.getVelocity());
+          },
+          onRefresh: () => target(true),
+        });
 
         // Section stops: change the face, and nudge toward that section's heading as it arrives.
         const nudge = q(".av-nudge")[0];
@@ -226,7 +265,9 @@ export function AvatarGuide() {
   return (
     <div ref={ref} aria-hidden className="pointer-events-none invisible fixed top-0 left-0 z-30 size-16">
       <div className="av-nudge size-full">
-        <AvatarFace className="size-full" />
+        <div className="av-walk size-full">
+          <AvatarFace className="size-full" />
+        </div>
       </div>
     </div>
   );
